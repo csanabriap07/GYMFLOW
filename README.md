@@ -41,7 +41,7 @@ Presenta la organización y priorización de historias de usuario por actividade
 ```text
 GymFlow/
 └── Workshop-1/
-    ├── README.md
-    ├── documentacion-requerimientos.pdf
-    ├── historias-de-usuario.pdf
-    └── user-story-mapping.pdf
+    ├── Análisis.pdf
+        ├── documentacion-requerimientos
+        ├── historias-de-usuario
+        └── user-story-mapping
