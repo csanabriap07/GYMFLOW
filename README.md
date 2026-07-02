@@ -1,47 +1,50 @@
 # GymFlow
 
-## Ingeniería de Software II - Workshop 1
-**Requirements, User Stories and Story Mapping**
+Sistema de control de acceso físico y gestión de membresías para gimnasios
+pequeños y medianos. Ver `AGENTS.md` para la descripción completa, stack y
+convenciones — este README es solo un quickstart.
 
----
+**Antes de tocar código, lee `AGENTS.md` y `spec/`.** Es un proyecto SDD
+(Spec-Driven Development): la fuente de verdad del diseño es `spec/`.
 
-## Universidad
-Universidad Nacional de Colombia  
-Facultad de Ingeniería
+## Estructura
 
-## Integrantes
-- Daniel Mauricio Marquez Cruz
-- Christian Alejandro Sanabria Pinzon
-- Juliana Parra Caro
-- William David Pinilla Ocampo
-- David Alejandro Sepulveda Amaya
+- `backend/` — API FastAPI (monolito modular)
+- `frontend/` — kiosko táctil + backoffice (React + Vite + Tailwind)
+- `spec/` — constitución + specs de cada feature (SDD)
+- `docs/` — material fuente original (propuesta, análisis, diagramas)
 
----
+## Quickstart local
 
-## Descripción del Proyecto
-GymFlow es una solución digital orientada a optimizar la gestión de acceso y administración de gimnasios. El sistema permite controlar el ingreso de socios, invitados y visitantes, validar membresías en tiempo real y administrar la operación del gimnasio de manera eficiente.
+```bash
+cp .env.example .env   # y completar los valores reales
 
----
+# Backend
+cd backend
+pipenv install --dev
+pipenv run alembic upgrade head
+pipenv run uvicorn main:app --reload
 
-## Contenido del Workshop 1
+# Frontend (en otra terminal)
+cd frontend
+npm install
+npm run dev
+```
 
-### 1. Documentación de Requerimientos
-Incluye los requerimientos funcionales y no funcionales del sistema.
+## Con Docker
 
-### 2. Historias de Usuario
-Contiene las historias de usuario definidas para los diferentes roles del sistema junto con sus criterios de aceptación.
+```bash
+cp .env.example .env
+docker compose up
+```
 
-### 3. User Story Mapping
-Presenta la organización y priorización de historias de usuario por actividades, tareas y sprints.
+- Backend: http://localhost:8000 (`/health` para verificar que levantó)
+- Frontend: http://localhost:5173
+- Postgres: localhost:5432
 
----
+## Tests
 
-## Estructura del repositorio
-
-```text
-GymFlow/
-└── Workshop-1/
-    ├── Análisis.pdf
-        ├── documentacion-requerimientos
-        ├── historias-de-usuario
-        └── user-story-mapping
+```bash
+cd backend
+pipenv run pytest
+```

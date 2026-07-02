@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Pipenv (nunca subir el venv; sí Pipfile.lock)
+Pipfile.lock.bak
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+
+# Docker
+*.pid
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Alembic (se versionan las migraciones, no artefactos temporales)
+*.sqlite3
