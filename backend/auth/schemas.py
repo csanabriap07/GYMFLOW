@@ -1,5 +1,13 @@
-"""
-Schemas Pydantic de auth (entrada/salida de API). Se agregan al implementar
-spec/features/003-autenticacion-segura/. Toda validación de entrada vive aquí, nunca a
-mano en el router (AGENTS.md).
-"""
+from pydantic import BaseModel, EmailStr
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    rol: str
+    expires_in: int = 1800

@@ -4,22 +4,22 @@
 
 ## Sprint 1 (Alta prioridad — base del sistema)
 
-3. **001 · Check-in con membresía activa** — HU-01. Validar cédula, calcular visitas restantes, registrar el check-in. *(feature de ejemplo ya creada, ver `features/001-checkin-membresia-activa/`)*
-4. **002 · Acceso denegado** — HU-02. Mensaje claro de rechazo cuando la membresía está vencida o sin visitas.
-5. **003 · Autenticación segura** — HU-10. Login de Empleado/Administrador con JWT y control por rol.
-6. **004 · Gestión de usuarios** — HU-07. CRUD de usuarios y membresías para el staff.
+3. ✅ **001 · Check-in con membresía activa** — HU-01. Validar cédula, calcular visitas restantes, registrar el check-in. *(Hecho — backend + frontend + tests)*
+4. ✅ **002 · Acceso denegado** — HU-02. Mensaje claro de rechazo + bloqueo dispositivo (RN-03). *(Hecho — backend + frontend + tests)*
+5. ✅ **003 · Autenticación segura** — HU-10. Login de Empleado/Administrador con JWT y control por rol. *(Hecho — backend + frontend + tests)*
+6. ✅ **004 · Gestión de usuarios** — HU-07. CRUD de usuarios y membresías para el staff. *(Hecho — backend + frontend + tests)*
 
 ## Sprint 2 (Alta/Media — invitados y experiencia)
 
-7. **005 · Cortesía de primer día** — HU-04. Alta automática como "Prospecto" con acceso gratuito único.
-8. **006 · Check-in de invitado** — HU-05. Descuento atómico de cupo de invitado del socio titular.
-9. **007 · Resumen de membresía** — HU-06. Detalle de tipo, vencimiento y visitas restantes.
-10. **008 · Búsqueda por múltiples criterios** — HU-03. Búsqueda por cédula, QR o nombre.
+7. ✅ **005 · Cortesía de primer día** — HU-04. Alta automática como "Prospecto" con acceso gratuito único. *(Hecho — backend + frontend + tests)*
+8. ✅ **006 · Check-in de invitado** — HU-05. Descuento atómico de cupo de invitado del socio titular. *(Hecho — backend + frontend + tests)*
+9. ✅ **007 · Resumen de membresía** — HU-06. Detalle de tipo, vencimiento y visitas restantes. *(Hecho — backend + frontend + tests)*
+10. ✅ **008 · Búsqueda por múltiples criterios** — HU-03. Búsqueda por cédula, QR o nombre. *(Hecho — backend + frontend + tests)*
 
 ## Sprint 3 (Media/Baja — administración y reportes)
 
-11. **009 · Configuración de tipos de membresía** — HU-08. CRUD de `MembershipType` respetando RN-05/RN-06.
-12. **010 · Reportes de asistencia** — HU-09. Reporte histórico con filtro por rango de fechas y export a XLSX/CSV.
+11. ✅ **009 · Configuración de tipos de membresía** — HU-08. CRUD de `MembershipType` respetando RN-05/RN-06. *(Hecho — backend + frontend + tests)*
+12. ✅ **010 · Reportes de asistencia** — HU-09. Reporte histórico con filtro por rango de fechas y export a XLSX/CSV. *(Hecho — backend + frontend + tests)*
 
 ## Semana de documentación
 

@@ -3,7 +3,7 @@ Tabla `checkins` — dueño: checkin (ver tech-stack.md). Registro inmutable.
 """
 import enum
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime, func
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime, Date, func
 
 from core.database import Base
 
@@ -19,6 +19,7 @@ class CheckIn(Base):
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
     fecha_hora = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    fecha = Column(Date, nullable=False)
     resultado = Column(Enum(ResultadoCheckin), nullable=False)
     # Distingue al menos: MEMBRESIA_VENCIDA, SIN_VISITAS, YA_INGRESO_HOY,
     # DISPOSITIVO_BLOQUEADO (ver 002-acceso-denegado).

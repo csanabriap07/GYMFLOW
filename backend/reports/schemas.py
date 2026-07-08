@@ -1,5 +1,17 @@
-"""
-Schemas Pydantic de reports (entrada/salida de API). Se agregan al implementar
-spec/features/010-reportes-asistencia/. Toda validación de entrada vive aquí, nunca a
-mano en el router (AGENTS.md).
-"""
+from pydantic import BaseModel
+from datetime import date
+
+
+class ReportFilters(BaseModel):
+    fecha_inicio: date
+    fecha_fin: date
+
+
+class AttendanceRow(BaseModel):
+    id: int
+    usuario_id: int
+    usuario_nombre: str
+    usuario_cedula: str
+    fecha_hora: str
+    resultado: str
+    razon: str | None = None

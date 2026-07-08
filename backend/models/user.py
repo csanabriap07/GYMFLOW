@@ -3,7 +3,7 @@ Tabla `usuarios` — dueño: members (ver tech-stack.md).
 """
 import enum
 
-from sqlalchemy import Column, Integer, String, Enum, DateTime, func
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, func
 
 from core.database import Base
 
@@ -33,8 +33,5 @@ class User(Base):
     estado = Column(Enum(EstadoUsuario), nullable=False, default=EstadoUsuario.activo)
     # Solo Empleado/Administrador tienen credenciales (HU-10, RN-12). Nunca texto plano.
     password_hash = Column(String(255), nullable=True)
+    cortesia_usada = Column(Boolean, nullable=False, default=False)
     creado_en = Column(DateTime(timezone=True), server_default=func.now())
-
-    # NOTA (duda abierta 005-cortesia-primer-dia): la marca de "cortesía usada" /
-    # rol Prospecto NO se agrega en este scaffold. Se define junto con el equipo
-    # al implementar esa feature, vía migración Alembic dedicada.

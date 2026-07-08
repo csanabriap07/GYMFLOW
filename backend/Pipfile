@@ -12,9 +12,11 @@ psycopg2-binary = "*"
 pydantic = "*"
 pydantic-settings = "*"
 pyjwt = "*"
-passlib = {extras = ["bcrypt"], version = "*"}
+bcrypt = "*"
 python-multipart = "*"
 python-dotenv = "*"
+tzdata = "*"
+openpyxl = "*"
 
 [dev-packages]
 pytest = "*"
@@ -22,4 +24,4 @@ httpx = "*"
 ruff = "*"
 
 [requires]
-python_version = "3.12"
+python_version = "3.14"

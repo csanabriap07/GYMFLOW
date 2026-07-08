@@ -13,10 +13,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 30
-    # Zona horaria del gimnasio, usada para calcular "día calendario" (RN-02) y
-    # ventanas temporales (RN-04). Centralizada aquí según plan.md de 001.
     timezone: str = "America/Bogota"
     environment: str = "development"
+    ventana_invitado_min: int = 10
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

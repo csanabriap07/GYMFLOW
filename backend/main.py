@@ -3,6 +3,7 @@
 routers. No debe contener lógica de negocio.
 """
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from auth.router import router as auth_router
 from members.router import router as members_router
@@ -11,6 +12,14 @@ from membership.router import router as membership_router
 from reports.router import router as reports_router
 
 app = FastAPI(title="GymFlow API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(members_router)

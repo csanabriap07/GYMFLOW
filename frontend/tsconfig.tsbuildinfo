@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/api.ts","./src/main.tsx","./src/pages/backoffice/backofficepage.tsx","./src/pages/backoffice/loginpage.tsx","./src/pages/backoffice/membershiptypespage.tsx","./src/pages/backoffice/reportspage.tsx","./src/pages/kiosko/kioskopage.tsx"],"version":"5.9.3"}

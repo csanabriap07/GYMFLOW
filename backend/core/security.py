@@ -1,28 +1,23 @@
-"""
-Utilidades de seguridad (core, según AGENTS.md): hash de contraseñas y JWT.
-
-Estas son utilidades técnicas genéricas (RN-12, HU-10) — la lógica de negocio de
-login/roles/expiración deslizante (RN-11) se implementa en `auth/` al construir
-spec/features/003-autenticacion-segura, no aquí.
-
-NOTA: verificar con Context7 la API vigente de PyJWT/passlib antes de mergear.
-"""
 from datetime import datetime, timedelta, timezone as dt_timezone
 
+import bcrypt
 import jwt
-from passlib.context import CryptContext
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
 
 from core.config import settings
+from core.database import get_db
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return pwd_context.verify(password, password_hash)
+    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
 
 
 def create_access_token(data: dict, expires_minutes: int | None = None) -> str:
@@ -36,3 +31,47 @@ def create_access_token(data: dict, expires_minutes: int | None = None) -> str:
 
 def decode_access_token(token: str) -> dict:
     return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+
+
+def get_current_user(
+    token: str | None = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    if token is None:
+        return None
+    try:
+        payload = decode_access_token(token)
+        user_id = int(payload.get("sub"))
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido o expirado",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    from members.repository import MembersRepository
+
+    repo = MembersRepository(db)
+    user = repo.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario no encontrado",
+        )
+    return user
+
+
+def require_role(*roles: str):
+    def dependency(user=Depends(get_current_user)):
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token requerido",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if user.rol not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Rol insuficiente",
+            )
+        return user
+    return dependency
