@@ -9,7 +9,14 @@ from sqlalchemy.orm import sessionmaker
 
 from core.database import engine
 
-_TABLAS_DE_TEST = ("checkins", "membresias", "usuarios", "tipos_membresia", "invitados")
+_TABLAS_DE_TEST = (
+    "checkins",
+    "checkin_device_locks",
+    "membresias",
+    "usuarios",
+    "tipos_membresia",
+    "invitados",
+)
 
 
 @pytest.fixture

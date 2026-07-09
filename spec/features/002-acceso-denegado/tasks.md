@@ -1,13 +1,13 @@
 # 002 · Acceso denegado — Tareas
 
-- [ ] `checkin/schemas.py`: enum `RazonDenegacion` + DTO de respuesta denegada.
-- [ ] `checkin/service.py`: devolver `Denegado` + motivo para RN-01 inversa y RN-02.
-- [ ] `models/` + migración Alembic: tabla `CheckinDeviceLock`.
-- [ ] `checkin/repository.py`: `register_failed_attempt`, `reset_attempts`, `is_locked`.
-- [ ] `checkin/router.py`: dependencia `enforce_device_not_locked` (X-Device-Id / IP) en endpoints de check-in.
-- [ ] Lógica RN-03: 3 fallos en ≤5 min → `bloqueado_hasta = now+20min`; éxito resetea contador.
-- [ ] Endpoint protegido (rol staff, feature 003) para **desbloquear** dispositivo manualmente.
-- [ ] Frontend: semáforo rojo con motivo + pantalla de bloqueo con cuenta regresiva.
-- [ ] Tests: vencida, sin visitas, ya ingresó hoy, 3 fallos→bloqueo, éxito resetea, denegado no toca saldos.
-- [ ] Validar contra los criterios de aceptación de `spec.md`.
-- [ ] Mover la feature a "Hecho" en `../../constitution/roadmap.md`.
+- [x] `checkin/schemas.py`: enum `RazonDenegacion` (`MEMBRESIA_VENCIDA`, `SIN_VISITAS`, `CEDULA_NO_ENCONTRADA`, `DISPOSITIVO_BLOQUEADO` — sin `YA_INGRESO_HOY`) + DTO de respuesta denegada.
+- [x] `checkin/service.py`: devolver `Denegado` + motivo para RN-01 inversa (`MEMBRESIA_VENCIDA`/`SIN_VISITAS`) y formato de cédula inválido (`CEDULA_NO_ENCONTRADA`).
+- [x] `models/` + migración Alembic: tabla `CheckinDeviceLock`.
+- [x] `checkin/repository.py`: `register_failed_attempt`, `reset_attempts`, `is_locked`.
+- [x] `checkin/router.py`: dependencia `enforce_device_not_locked` (X-Device-Id / IP) en endpoints de check-in.
+- [x] Lógica RN-03: 3 fallos en ≤5 min → `bloqueado_hasta = now+20min`; éxito resetea contador. Solo cuentan denegaciones por `CEDULA_NO_ENCONTRADA`.
+- [x] Endpoint para **desbloquear** dispositivo manualmente — implementado sin guard de rol todavía (`# TODO(003)`: agregar `Depends` de rol Staff cuando exista la feature `003-autenticacion-segura`).
+- [x] Frontend: semáforo rojo con motivo + pantalla de bloqueo con cuenta regresiva.
+- [x] Tests: vencida, sin visitas, 3 fallos→bloqueo, éxito resetea, denegado no toca saldos, ventana de 5 min expira el conteo. *(No aplica "ya ingresó hoy": ya no es una razón de denegación, ver `001`.)*
+- [x] Validar contra los criterios de aceptación de `spec.md`.
+- [x] Mover la feature a "Hecho" en `../../constitution/roadmap.md`.

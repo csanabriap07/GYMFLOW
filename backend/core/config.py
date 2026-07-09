@@ -2,6 +2,9 @@
 Configuración central del backend (core, según AGENTS.md).
 Lee variables de entorno / .env vía pydantic-settings.
 """
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,3 +24,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def now() -> datetime:
+    """Hora actual en la zona horaria del gimnasio (tz-aware). Compartida por
+    cualquier módulo que necesite "ahora"/"hoy" en vez de UTC del servidor."""
+    return datetime.now(ZoneInfo(settings.timezone))

@@ -5,10 +5,10 @@
 ## Hecho
 
 - **001 · Check-in con membresía activa** — HU-01. Motor de validación (Filtro 1 `isActive` de hoy, Filtro 2 RN-01) en una transacción única (RN-10), con `SELECT ... FOR UPDATE` + índice único parcial para concurrencia (RN-08/RN-02), `GET /health`, y pantalla de kiosko (teclado numérico + semáforo). 6/6 tests en verde (incluye 10 check-ins concurrentes) y verificado end-to-end en navegador real. Ver `features/001-checkin-membresia-activa/`.
+- **002 · Acceso denegado** — HU-02. Semáforo rojo con motivo exacto (`MEMBRESIA_VENCIDA`/`SIN_VISITAS`/`CEDULA_NO_ENCONTRADA`) persistido en `CheckIn`, y bloqueo de dispositivo 20 min tras 3 fallos por cédula inválida en ≤5 min (RN-03, contador en tabla `CheckinDeviceLock` para ser correcto con múltiples workers). Identidad de dispositivo resuelta como `X-Device-Id` + fallback IP. Endpoint de desbloqueo manual implementado sin guard de rol (pendiente de `003`). 11/11 tests en verde y verificado end-to-end en Docker + navegador real. Ver `features/002-acceso-denegado/`.
 
 ## Sprint 1 (Alta prioridad — base del sistema)
 
-4. **002 · Acceso denegado** — HU-02. Mensaje claro de rechazo cuando la membresía está vencida o sin visitas.
 5. **003 · Autenticación segura** — HU-10. Login de Empleado/Administrador con JWT y control por rol.
 6. **004 · Gestión de usuarios y membresías** — HU-07. CRUD de usuarios, **primera asignación de membresía y renovación** (fusionado con lo que iba a ser "013" — ver `004`, sin HU de origen para la parte de renovación, hueco identificado en revisión de dominio: cierra lo que dejaba RN-06 sin forma de dispararse).
 
@@ -40,5 +40,5 @@
 
 ## Backlog / ideas 💡
 
-- Bloqueo de dispositivo tras 3 intentos fallidos en 5 min (RN-03) — **decisión:** se implementa dentro de `002-acceso-denegado` como guard de dispositivo del módulo `checkin` (el contador vive donde se producen las denegaciones), no como feature independiente. Ver `features/002-acceso-denegado/`. Queda abierta la confirmación de la *identidad de dispositivo* (header `X-Device-Id` vs IP) con el equipo/profesora.
+- Bloqueo de dispositivo tras 3 intentos fallidos en 5 min (RN-03) — **hecho** dentro de `002-acceso-denegado` como guard de dispositivo del módulo `checkin` (el contador vive donde se producen las denegaciones), no como feature independiente. Ver `features/002-acceso-denegado/`. La *identidad de dispositivo* se resolvió como `X-Device-Id` + fallback IP para poder avanzar — sigue sin confirmar formalmente con el equipo/profesora.
 - Multi-sede — explícitamente fuera de alcance (ver `mission.md`), no planear a menos que cambie el alcance del proyecto.

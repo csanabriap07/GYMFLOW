@@ -5,19 +5,25 @@ Regla de módulos (no negociable, AGENTS.md): este service es el ÚNICO punto de
 entrada que otros módulos pueden llamar para leer/mutar datos de membership.
 Ningún otro módulo debe importar membership/repository.py directamente.
 """
-from datetime import date, datetime
-from zoneinfo import ZoneInfo
+from datetime import date
 
 from sqlalchemy.orm import Session
 
-from core.config import settings
+from core.config import now as _now
 from membership.repository import MembershipRepository, MembershipTypeRepository
 from membership.schemas import MembershipSummary
 from models import Membership
 
 
 def hoy() -> date:
-    return datetime.now(ZoneInfo(settings.timezone)).date()
+    return _now().date()
+
+
+def get_membership_for_user(user_id: int, db: Session) -> Membership | None:
+    """Fila `estado=activa` sin validar fecha/visitas — para que quien llame
+    (ej. checkin.service, RN-01 inversa de 002) determine la razón exacta de
+    por qué RN-01 no se cumple."""
+    return MembershipRepository(db).get_active_by_user(user_id)
 
 
 def get_active_membership(user_id: int, db: Session) -> Membership | None:

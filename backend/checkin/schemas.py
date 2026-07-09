@@ -3,9 +3,25 @@ Schemas Pydantic de checkin (entrada/salida de API). Se agregan al implementar
 spec/features/001, 002, 005, 006/. Toda validación de entrada vive aquí, nunca a
 mano en el router (AGENTS.md).
 """
+import enum
+from datetime import datetime
+
 from pydantic import BaseModel
 
-from checkin.service import CheckinResultado
+
+class CheckinResultado(str, enum.Enum):
+    exitoso = "exitoso"
+    denegado = "denegado"
+
+
+class RazonDenegacion(str, enum.Enum):
+    """spec.md de 002 — sin `YA_INGRESO_HOY`: un reingreso el mismo día es
+    Exitoso (ver 001), no una razón de denegación."""
+
+    membresia_vencida = "MEMBRESIA_VENCIDA"
+    sin_visitas = "SIN_VISITAS"
+    cedula_no_encontrada = "CEDULA_NO_ENCONTRADA"
+    dispositivo_bloqueado = "DISPOSITIVO_BLOQUEADO"
 
 
 class CheckinRequest(BaseModel):
@@ -17,3 +33,9 @@ class CheckinResponse(BaseModel):
     mensaje: str
     nombre: str | None = None
     visitas_restantes: int | None = None
+    razon: RazonDenegacion | None = None
+
+
+class DispositivoBloqueadoResponse(BaseModel):
+    mensaje: str
+    bloqueado_hasta: datetime
