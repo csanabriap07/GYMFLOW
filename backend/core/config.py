@@ -1,0 +1,23 @@
+"""
+Configuración central del backend (core, según AGENTS.md).
+Lee variables de entorno / .env vía pydantic-settings.
+"""
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    database_url: str
+    # docker-compose.yml/.env ya usan JWT_SECRET (no JWT_SECRET_KEY, el default de pydantic-settings).
+    jwt_secret_key: str = Field(validation_alias="JWT_SECRET")
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 30
+    # Zona horaria del gimnasio, usada para calcular "día calendario" (RN-02) y
+    # ventanas temporales (RN-04). Centralizada aquí según plan.md de 001.
+    timezone: str = "America/Bogota"
+    environment: str = "development"
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
+settings = Settings()
