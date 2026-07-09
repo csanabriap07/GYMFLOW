@@ -2,9 +2,12 @@
 
 > Basado en el mapa de historias de usuario y la planeación de 3 sprints de la Propuesta. Cada feature se crea en `features/NNN-nombre-feature/` con `spec.md`, `plan.md` y `tasks.md` antes de tocar código.
 
+## Hecho
+
+- **001 · Check-in con membresía activa** — HU-01. Motor de validación (Filtro 1 `isActive` de hoy, Filtro 2 RN-01) en una transacción única (RN-10), con `SELECT ... FOR UPDATE` + índice único parcial para concurrencia (RN-08/RN-02), `GET /health`, y pantalla de kiosko (teclado numérico + semáforo). 6/6 tests en verde (incluye 10 check-ins concurrentes) y verificado end-to-end en navegador real. Ver `features/001-checkin-membresia-activa/`.
+
 ## Sprint 1 (Alta prioridad — base del sistema)
 
-3. **001 · Check-in con membresía activa** — HU-01. Validar cédula, calcular visitas restantes, registrar el check-in. *(feature de ejemplo ya creada, ver `features/001-checkin-membresia-activa/`)*
 4. **002 · Acceso denegado** — HU-02. Mensaje claro de rechazo cuando la membresía está vencida o sin visitas.
 5. **003 · Autenticación segura** — HU-10. Login de Empleado/Administrador con JWT y control por rol.
 6. **004 · Gestión de usuarios y membresías** — HU-07. CRUD de usuarios, **primera asignación de membresía y renovación** (fusionado con lo que iba a ser "013" — ver `004`, sin HU de origen para la parte de renovación, hueco identificado en revisión de dominio: cierra lo que dejaba RN-06 sin forma de dispararse).
