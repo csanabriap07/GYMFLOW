@@ -1,0 +1,41 @@
+# Roadmap
+
+> Basado en el mapa de historias de usuario y la planeación de 3 sprints de la Propuesta. Cada feature se crea en `features/NNN-nombre-feature/` con `spec.md`, `plan.md` y `tasks.md` antes de tocar código.
+
+## Sprint 1 (Alta prioridad — base del sistema)
+
+3. **001 · Check-in con membresía activa** — HU-01. Validar cédula, calcular visitas restantes, registrar el check-in. *(feature de ejemplo ya creada, ver `features/001-checkin-membresia-activa/`)*
+4. **002 · Acceso denegado** — HU-02. Mensaje claro de rechazo cuando la membresía está vencida o sin visitas.
+5. **003 · Autenticación segura** — HU-10. Login de Empleado/Administrador con JWT y control por rol.
+6. **004 · Gestión de usuarios y membresías** — HU-07. CRUD de usuarios, **primera asignación de membresía y renovación** (fusionado con lo que iba a ser "013" — ver `004`, sin HU de origen para la parte de renovación, hueco identificado en revisión de dominio: cierra lo que dejaba RN-06 sin forma de dispararse).
+
+## Sprint 2 (Alta/Media — invitados y experiencia)
+
+7. **005 · Cortesía de primer día** — HU-04. Alta automática como "Prospecto" con acceso gratuito único.
+8. **006 · Check-in de invitado** — HU-05. Descuento atómico de cupo de invitado del socio titular.
+9. **007 · Resumen de membresía** — HU-06. Detalle de tipo, vencimiento y visitas restantes.
+10. **008 · Búsqueda por múltiples criterios** — HU-03. Búsqueda por cédula, QR o nombre.
+
+## Sprint 3 (Media/Baja — administración y reportes)
+
+11. **009 · Configuración de tipos de membresía** — HU-08. CRUD de `MembershipType` respetando RN-05/RN-06.
+12. **010 · Reportes de asistencia** — HU-09. Reporte histórico con filtro por rango de fechas y export a XLSX/CSV.
+
+## Añadido tras revisión — Portal del socio y QR dinámico
+
+> Resuelve la contradicción documentada en `008-busqueda-multiples-criterios` (RF-02 pedía "QR dinámico por sesión del Miembro" pero la misión decía "sin login"). Decisión: el Miembro puede loguearse en un portal web nuevo; el check-in por cédula/nombre en el kiosko sigue intacto. Ver `mission.md` para el detalle de la decisión.
+
+> **Reinterpretación de prioridad (HU-01 vs HU-03):** el equipo confirma que la esencia del producto siempre fue **HU-03** (identificación por QR, sin contacto), no **HU-01** (cédula). Esto **no reescribe el texto de HU-01/HU-03** en `docs/` — esos quedan como registro histórico de lo que se redactó. Lo que cambia es cómo se prioriza en `spec/`: `001` deja de tratarse como "el flujo central" y pasa a ser el **motor de validación compartido** (reglas de negocio: membresía activa, visitas, duplicado del día, descuento atómico) que tanto el check-in manual (`001`) como el check-in por QR (`012`) reutilizan. La parte que sí cambia de rol es solo la **identificación** (cédula → respaldo, QR → camino esperado), no el motor de reglas en sí.
+
+13. **011 · Portal del socio y autenticación** — Login/registro del Miembro con correo/contraseña, sesión larga con refresh token, y pantalla de resumen (reutiliza el endpoint de `007-resumen-membresia`). Prerrequisito de `012`.
+14. **012 · Check-in por QR dinámico (HU-03 — flujo esencial del producto)** — El kiosko muestra un QR que rota, el socio lo escanea desde el portal web (botón de cámara), el backend valida su sesión + el QR y notifica al kiosko por WebSocket. Reutiliza el motor de reglas de `001`. Depende de `011` y reemplaza el workaround de "QR estático" que quedó anotado como pendiente en `008`.
+
+## Semana de documentación
+
+- Consolidar `docs/` y `spec/` finales para entrega.
+- Verificar trazabilidad: cada HU → su feature → sus criterios de aceptación cumplidos.
+
+## Backlog / ideas 💡
+
+- Bloqueo de dispositivo tras 3 intentos fallidos en 5 min (RN-03) — **decisión:** se implementa dentro de `002-acceso-denegado` como guard de dispositivo del módulo `checkin` (el contador vive donde se producen las denegaciones), no como feature independiente. Ver `features/002-acceso-denegado/`. Queda abierta la confirmación de la *identidad de dispositivo* (header `X-Device-Id` vs IP) con el equipo/profesora.
+- Multi-sede — explícitamente fuera de alcance (ver `mission.md`), no planear a menos que cambie el alcance del proyecto.
