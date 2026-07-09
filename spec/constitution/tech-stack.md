@@ -6,7 +6,7 @@
 
 > Versiones confirmadas (julio 2026), no supuestas — `pipenv`/`npm` resolvieron estas versiones reales contra PyPI/npm al armar el scaffold (ver `ci-cd.md`). Se fija versión exacta donde ya se generó lock file real; donde no, queda como "última estable" a resolver cuando se instale.
 
-- **Lenguaje backend:** Python **3.13** (`Pipfile` lo declara así). *Nota: el lock file de este scaffold se resolvió en un entorno con Python 3.12 disponible — el equipo debe correr `pipenv lock` una vez en una máquina/CI con 3.13 real antes de depender de `--deploy` en el Dockerfile, ver `ci-cd.md`.*
+- **Lenguaje backend:** Python **3.13** (`Pipfile` lo declara así). El lock file ya se regeneró en una máquina con Python 3.13 real, así que el Dockerfile usa `pipenv install --deploy` (ver `ci-cd.md`).
 - **Lenguaje frontend:** TypeScript, Node.js **20.19+ / 22.12+** (requisito de Vite 8)
 - **Framework / runtime backend:** FastAPI **0.139.0**
 - **Framework frontend:** React **19.2.7** + Vite **8.1.x**, Tailwind CSS **4.3.2**

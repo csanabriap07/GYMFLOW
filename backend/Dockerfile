@@ -17,16 +17,9 @@ RUN pip install --no-cache-dir pipenv==2024.0.1
 # Copiamos solo los manifiestos primero para aprovechar la cache de Docker:
 # si el código cambia pero Pipfile no, este paso no se vuelve a ejecutar.
 COPY Pipfile Pipfile.lock ./
-# NOTA: Pipfile.lock se generó con Python 3.12 (único disponible al armar
-# este scaffold). Los NOMBRES y VERSIONES de los paquetes son reales y
-# correctos (fastapi==0.139.0, sqlalchemy==2.0.51, alembic==1.18.5, etc.),
-# pero los hashes de wheels pueden no cubrir cp313 todavía. Por eso NO
-# usamos "--deploy" (que exige que el lock case perfecto): dejamos que
-# pipenv resuelva contra Pipfile si el lock no aplica exacto a 3.13.
-# Acción pendiente para el equipo: correr `pipenv lock` una vez en una
-# máquina/CI con Python 3.13 real y commitear el lock regenerado —
-# a partir de ahí sí se puede volver a exigir "--deploy" aquí.
-RUN pipenv install --system --skip-lock
+# Pipfile.lock ya se regeneró con Python 3.13 real, así que "--deploy"
+# (falla si el lock no matchea exacto el Pipfile) es seguro de exigir aquí.
+RUN pipenv install --system --deploy
 
 COPY . .
 

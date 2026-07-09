@@ -18,6 +18,7 @@ pyjwt = "*"
 [dev-packages]
 pytest = "*"
 httpx = "*"
+ruff = "*"
 
 [requires]
 python_version = "3.13"

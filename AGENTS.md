@@ -41,7 +41,7 @@ La fuente de verdad del diseño es `spec/`. Este archivo no repite ese contenido
 
 - `docker compose up` — levanta el stack completo
 
-**Lint:** herramienta a definir con el equipo (p. ej. `ruff`, instalable con `pipenv install --dev ruff`); acordar antes de exigirla en PR.
+**Lint:** frontend usa `oxlint` (`frontend/.oxlintrc.json`, `npm run lint`); backend usa `ruff` (`pipenv run ruff check .`), ya en `Pipfile` como dependencia de desarrollo.
 
 ## Estructura del proyecto
 
