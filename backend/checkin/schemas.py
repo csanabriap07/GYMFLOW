@@ -39,3 +39,14 @@ class CheckinResponse(BaseModel):
 class DispositivoBloqueadoResponse(BaseModel):
     mensaje: str
     bloqueado_hasta: datetime
+
+
+class DispositivoBloqueadoInfo(BaseModel):
+    """Para que Staff sepa qué `device_id` pasarle al endpoint de desbloqueo
+    manual — sin esto no hay forma de saber cuál dispositivo es cuál."""
+
+    device_id: str
+    intentos_fallidos: int
+    bloqueado_hasta: datetime
+
+    model_config = {"from_attributes": True}

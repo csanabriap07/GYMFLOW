@@ -97,3 +97,13 @@ class CheckinDeviceLockRepository:
         lock.ventana_inicio = None
         lock.bloqueado_hasta = None
         self.db.flush()
+
+    def listar_bloqueados(self, momento: datetime) -> list[CheckinDeviceLock]:
+        """Para que Staff sepa qué `device_id` desbloquear manualmente — hoy
+        no hay forma de verlo salvo consultando esto (sin panel todavía)."""
+        return (
+            self.db.query(CheckinDeviceLock)
+            .filter(CheckinDeviceLock.bloqueado_hasta.isnot(None))
+            .filter(CheckinDeviceLock.bloqueado_hasta > momento)
+            .all()
+        )

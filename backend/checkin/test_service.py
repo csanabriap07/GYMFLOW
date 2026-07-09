@@ -165,6 +165,19 @@ def test_tres_fallos_de_cedula_invalida_bloquean_el_dispositivo(db):
     assert lock_repo.is_locked(DEVICE, _now())
 
 
+def test_listar_bloqueados_muestra_el_device_id_para_desbloquear(db):
+    """Sin panel de staff todavía, esto es la única forma de saber qué
+    device_id pasarle al endpoint de desbloqueo manual."""
+    for _ in range(3):
+        checkin_member("xx", DEVICE, db)
+
+    bloqueados = CheckinDeviceLockRepository(db).listar_bloqueados(_now())
+
+    assert len(bloqueados) == 1
+    assert bloqueados[0].device_id == DEVICE
+    assert bloqueados[0].intentos_fallidos == 3
+
+
 def test_checkin_exitoso_resetea_contador_de_fallos(db):
     user, _ = _crear_socio(db, visitas_restantes=5)
 

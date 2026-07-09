@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from checkin.repository import CheckinDeviceLockRepository
-from checkin.schemas import CheckinRequest, CheckinResponse
+from checkin.schemas import CheckinRequest, CheckinResponse, DispositivoBloqueadoInfo
 from checkin.service import UsuarioNoEncontradoError, checkin_member
 from core.config import now as _now
 from core.database import get_db
@@ -56,6 +56,15 @@ def post_checkin(
         visitas_restantes=visitas_restantes,
         razon=razon,
     )
+
+
+@router.get("/dispositivos-bloqueados", response_model=list[DispositivoBloqueadoInfo])
+def get_dispositivos_bloqueados(db: Session = Depends(get_db)) -> list[DispositivoBloqueadoInfo]:
+    # TODO(003-autenticacion-segura): proteger con Depends de rol Staff —
+    # sin esto, hoy es la única forma de saber qué device_id desbloquear
+    # (no hay panel de staff todavía, ver spec/features/002-acceso-denegado/).
+    bloqueados = CheckinDeviceLockRepository(db).listar_bloqueados(_now())
+    return [DispositivoBloqueadoInfo.model_validate(b) for b in bloqueados]
 
 
 @router.post("/desbloquear/{device_id}")
