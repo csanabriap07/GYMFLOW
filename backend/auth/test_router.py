@@ -19,6 +19,16 @@ def test_login_credenciales_validas_devuelve_200_y_token(db, empleado):
     body = resp.json()
     assert body["access_token"]
     assert body["rol"] == "empleado"
+    assert body["permisos"] == []
+
+
+def test_login_devuelve_permisos_individuales_del_empleado(db, empleado):
+    otorgar_permiso(db, empleado.id, "checkin.desbloquear_dispositivo")
+
+    resp = client.post("/auth/login", json={"email": empleado.email, "password": PASSWORD})
+
+    assert resp.status_code == 200
+    assert resp.json()["permisos"] == ["checkin.desbloquear_dispositivo"]
 
 
 def test_login_credenciales_invalidas_devuelve_401_mensaje_generico(db, empleado):
@@ -116,3 +126,86 @@ def test_kiosko_checkin_funciona_sin_authorization_header(db):
         "/checkin", json={"cedula": "99999999"}, headers={"X-Device-Id": "kiosko-test-auth"}
     )
     assert resp.status_code == 404
+
+
+# --- Otorgar/quitar/listar permisos individuales (004-gestion-usuarios) ---
+
+
+def test_otorgar_permiso_como_empleado_403(db, empleado):
+    token = create_access_token({"sub": str(empleado.id), "rol": "empleado"})
+    resp = client.post(
+        f"/auth/usuarios/{empleado.id}/permisos",
+        json={"codigo": "membership.renovar"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 403
+
+
+def test_otorgar_y_listar_permiso_como_administrador(db, administrador, empleado):
+    token = create_access_token({"sub": str(administrador.id), "rol": "administrador"})
+
+    otorgar = client.post(
+        f"/auth/usuarios/{empleado.id}/permisos",
+        json={"codigo": "membership.renovar"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert otorgar.status_code == 204
+
+    listado = client.get(
+        f"/auth/usuarios/{empleado.id}/permisos", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert listado.status_code == 200
+    assert [p["codigo"] for p in listado.json()] == ["membership.renovar"]
+
+
+def test_otorgar_permiso_codigo_inexistente_404(db, administrador, empleado):
+    token = create_access_token({"sub": str(administrador.id), "rol": "administrador"})
+    resp = client.post(
+        f"/auth/usuarios/{empleado.id}/permisos",
+        json={"codigo": "no.existe"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 404
+
+
+def test_quitar_permiso_ya_otorgado(db, administrador, empleado):
+    token = create_access_token({"sub": str(administrador.id), "rol": "administrador"})
+    otorgar_permiso(db, empleado.id, "membership.renovar")
+
+    resp = client.delete(
+        f"/auth/usuarios/{empleado.id}/permisos/membership.renovar",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 204
+
+    listado = client.get(
+        f"/auth/usuarios/{empleado.id}/permisos", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert listado.json() == []
+
+
+def test_otorgar_permiso_usuario_inexistente_404(db, administrador):
+    token = create_access_token({"sub": str(administrador.id), "rol": "administrador"})
+    resp = client.post(
+        "/auth/usuarios/9999/permisos",
+        json={"codigo": "membership.renovar"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 404
+
+
+def test_get_catalogo_permisos_como_administrador(db, administrador):
+    token = create_access_token({"sub": str(administrador.id), "rol": "administrador"})
+    resp = client.get("/auth/permisos", headers={"Authorization": f"Bearer {token}"})
+
+    assert resp.status_code == 200
+    codigos = {p["codigo"] for p in resp.json()}
+    assert "membership.renovar" in codigos
+    assert "members.asignar_rol_empleado" in codigos
+    assert all(p["descripcion"] for p in resp.json())
+
+
+def test_get_catalogo_permisos_como_empleado_403(db, empleado):
+    token = create_access_token({"sub": str(empleado.id), "rol": "empleado"})
+    resp = client.get("/auth/permisos", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403

@@ -20,3 +20,41 @@ class AuthRepository:
             .where(usuario_permisos.c.usuario_id == usuario_id)
         )
         return set(self.db.scalars(query).all())
+
+    def get_permiso_by_codigo(self, codigo: str) -> Permiso | None:
+        return self.db.query(Permiso).filter(Permiso.codigo == codigo).first()
+
+    def list_catalog(self) -> list[Permiso]:
+        """Todo el catálogo de permisos (no solo los otorgados a un usuario) —
+        para que un administrador vea qué códigos existen antes de otorgar
+        uno (004)."""
+        return self.db.query(Permiso).order_by(Permiso.codigo).all()
+
+    def list_granted(self, usuario_id: int) -> list[Permiso]:
+        query = (
+            select(Permiso)
+            .join(usuario_permisos, usuario_permisos.c.permiso_id == Permiso.id)
+            .where(usuario_permisos.c.usuario_id == usuario_id)
+            .order_by(Permiso.codigo)
+        )
+        return list(self.db.scalars(query).all())
+
+    def grant(self, usuario_id: int, permiso_id: int) -> None:
+        ya_otorgado = self.db.execute(
+            select(usuario_permisos).where(
+                usuario_permisos.c.usuario_id == usuario_id,
+                usuario_permisos.c.permiso_id == permiso_id,
+            )
+        ).first()
+        if ya_otorgado is None:
+            self.db.execute(
+                usuario_permisos.insert().values(usuario_id=usuario_id, permiso_id=permiso_id)
+            )
+
+    def revoke(self, usuario_id: int, permiso_id: int) -> None:
+        self.db.execute(
+            usuario_permisos.delete().where(
+                usuario_permisos.c.usuario_id == usuario_id,
+                usuario_permisos.c.permiso_id == permiso_id,
+            )
+        )

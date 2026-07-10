@@ -27,38 +27,50 @@ Sin altas manuales no hay miembros que validar en el kiosko; es la base operativ
 
 - **Renovar crea una `Membership` nueva, no sobreescribe la existente.** La fila anterior queda intacta como histórico (`estado = Vencida` cuando corresponda). Razón: los tipos de membresía y sus precios cambian con el tiempo (RN-06) — sobreescribir perdería el registro de qué precio/plan tenía el socio en cada ciclo pasado. Consistente con RN-07 (preservar histórico) y con lo que `010` necesita para reportar por ciclo.
 - **Pago en ventanilla.** El pago ocurre en un punto de atención física, fuera del sistema.
+- **Borrado de usuario (RN-07): anonimización, no borrado físico.** Se vacía `cédula/nombre/email`, se marca `estado = Inactivo`, se conserva el `id`. Los `CheckIn` existentes siguen apuntando a ese `id` intacto. Consistente con que `User.cedula/nombre/email` ya son `nullable` en el modelo actual pensando en este caso.
+- **Upgrade/downgrade permitido al renovar.** El Staff puede elegir cualquier `MembershipType` vigente al renovar, sea el mismo que tenía el socio u otro distinto.
+- **Fecha de inicio en renovación anticipada:** si la `Membership` anterior **todavía está vigente** al momento de renovar, la nueva `fecha_inicio` = `fecha_vencimiento` de la anterior **+ 1 día** (no se pierden días pagados). Si la anterior ya venció, la nueva `fecha_inicio` = hoy.
+- **Permiso de renovación: individual, no solo por rol.** Se crea el permiso `membership.renovar` (catálogo `permisos`, mismo mecanismo de `003`). Un Empleado necesita que se lo otorguen explícitamente para renovar membresías; `administrador` lo tiene implícito. Como hoy no existe forma de otorgar permisos fuera de un script de desarrollo, **004 agrega el endpoint para que un Administrador otorgue/quite permisos a un usuario específico** (alcance ya señalado en `roadmap.md`, ausente hasta ahora del spec — se incorpora aquí).
+- **Registro de pago en la renovación:** se agrega `monto` (`Numeric(10,2)`, obligatorio) y `nota` (texto libre, opcional) a la operación de renovación/asignación, para dejar trazabilidad de qué se cobró.
+- **Quién puede crear/ascender a qué rol (hallazgo posterior a la implementación inicial, probado por el equipo):** el RBAC general (Empleado/Administrador, RF-09) no bastaba — cualquier Empleado podía crear otro Administrador. Se agrega una restricción más fina, aplicada tanto a **crear** un usuario como a **editar el rol** de uno existente:
+  - Rol `administrador`: reservado exclusivamente a otro `administrador`. Ningún permiso individual lo habilita.
+  - Rol `empleado`: `administrador`, o un `empleado` con el permiso individual nuevo `members.asignar_rol_empleado` (mismo mecanismo que `membership.renovar`).
+  - Rol `miembro`/`invitado`: cualquier Staff autenticado, sin restricción adicional (como ya era).
+- **CRUD básico de usuarios también gateado por permiso individual (segundo hallazgo, probado por el equipo con un Empleado sin permisos):** el criterio original de esta sección ("Todos los endpoints exigen rol Empleado/Administrador") no distinguía entre autenticación (RF-09) y autorización fina — cualquier Empleado podía crear/listar/editar/eliminar usuarios sin nada más que el rol. Se agrega el permiso individual `members.gestionar_usuarios`: sin él, un Empleado no puede usar `POST/GET/PUT/DELETE /usuarios` en absoluto (403), independientemente de `members.asignar_rol_empleado` (ese solo decide a qué rol se puede crear/ascender, no si se puede gestionar usuarios). `administrador` lo tiene implícito. Los sub-recursos de membresía (asignar primera vez, ver historial) **no** quedaron detrás de este permiso — siguen abiertos a cualquier Staff, como decía el criterio original; solo renovar ya tenía su propio permiso (`membership.renovar`).
 
 ## Criterios de aceptación
 
 ### CRUD de usuarios
-- [ ] Un Staff autenticado puede **crear** un usuario (`cédula`, `nombre`, `email`, `rol`, `estado`) y el perfil queda persistido (RF-10).
-- [ ] Un Staff puede **leer, listar y editar** usuarios.
+- [ ] Un Staff autenticado con el permiso individual `members.gestionar_usuarios` puede **crear** un usuario (`cédula`, `nombre`, `email`, `rol`, `estado`) y el perfil queda persistido (RF-10). Sin ese permiso (y sin ser `administrador`), el intento devuelve 403.
+- [ ] Un Staff con `members.gestionar_usuarios` puede **leer, listar y editar** usuarios; sin él, 403 en los cuatro endpoints (`POST/GET/PUT/DELETE /usuarios`).
 - [ ] Al **eliminar** un usuario, su información personal (`cédula`, `nombre`, `email`) se borra de forma irreversible, **pero** sus registros de `CheckIn` históricos se preservan (RN-07). *Comprobable: tras el borrado, los `CheckIn` del usuario siguen existiendo para estadística.*
 - [ ] Si se crea un usuario Empleado/Administrador con credenciales, la contraseña se guarda **hasheada** (RN-12).
 - [ ] Todos los endpoints exigen rol Empleado/Administrador (RBAC, RF-09); sin token válido → 401/403.
+- [ ] Un Empleado **sin** el permiso `members.asignar_rol_empleado` no puede crear ni ascender a nadie a `empleado` o `administrador` (403) — ni creando un usuario nuevo con ese rol, ni editando el rol de uno existente. Con el permiso, puede crear/ascender a `empleado`, pero **nunca** a `administrador`.
 
 ### Primera asignación de membresía
-- [ ] Un Staff puede **asignar una membresía** a un usuario **sin `Membership` previa**, vinculando un `MembershipType` existente y creando su `Membership` con saldos iniciales (`visitas_restantes`, `cupo_invitados_restantes` = totales del tipo).
+- [ ] Un Staff puede **asignar una membresía** a un usuario **sin `Membership` previa**, vinculando un `MembershipType` existente y creando su `Membership` con saldos iniciales (`visitas_restantes`, `cupo_invitados_restantes` = totales del tipo), registrando `monto` (obligatorio) y `nota` (opcional).
 
 ### Renovación de membresía
 - [ ] Un Staff busca un socio existente (reutiliza `008`) y ve su membresía actual (vigente o vencida) y su historial de membresías anteriores.
-- [ ] El Staff confirma la renovación indicando el `MembershipType` a aplicar (puede ser el mismo que tenía o uno distinto — ver duda abierta sobre upgrade/downgrade).
-- [ ] Al confirmar, el sistema crea una **`Membership` nueva** (fila distinta): `fecha_inicio` = hoy, `fecha_vencimiento` = `fecha_inicio + duracion_dias`, `visitas_restantes` = `visitas_totales` del tipo, `cupo_invitados_restantes` = `cupo_invitados` del tipo, `estado` = Activa, tomando los valores del `MembershipType` **vigentes en el momento de renovar**.
+- [ ] Renovar requiere el permiso individual `membership.renovar` (o rol `administrador`, que lo tiene implícito) — no basta con el rol `Empleado` genérico.
+- [ ] El Staff confirma la renovación indicando el `MembershipType` a aplicar (puede ser el mismo que tenía o uno distinto — upgrade/downgrade permitido), el `monto` cobrado (obligatorio) y una `nota` opcional.
+- [ ] Al confirmar, el sistema crea una **`Membership` nueva** (fila distinta): `fecha_vencimiento` = `fecha_inicio + duracion_dias`, `visitas_restantes` = `visitas_totales` del tipo, `cupo_invitados_restantes` = `cupo_invitados` del tipo, `estado` = Activa, tomando los valores del `MembershipType` **vigentes en el momento de renovar**.
+  - `fecha_inicio` = **hoy**, salvo que la `Membership` anterior siga vigente (no vencida) al momento de renovar, en cuyo caso `fecha_inicio` = `fecha_vencimiento` de la anterior **+ 1 día**.
 - [ ] La `Membership` anterior **no se modifica** — queda como registro histórico, consultable en reportes (`010`) y en el historial del socio.
 - [ ] Ambas operaciones (primera asignación y renovación) son **atómicas** (RN-10): si falla, no queda una `Membership` a medias.
 - [ ] El historial de `CheckIn` del socio **no se altera** por ninguna de las dos operaciones.
+
+### Permisos individuales (otorgar/quitar)
+- [ ] Un Administrador puede **otorgar** un permiso (ej. `membership.renovar`) a un usuario Empleado específico.
+- [ ] Un Administrador puede **quitar** un permiso previamente otorgado a un usuario.
+- [ ] Un Administrador puede **listar** los permisos actuales de un usuario.
+- [ ] Estos endpoints exigen rol `administrador` (no basta ser Empleado).
 
 ## Fuera de alcance
 
 - **Autenticación** (login, emisión de JWT, RBAC) → `003-autenticacion-segura`.
 - **CRUD de tipos de membresía** (`MembershipType`) → `009-configuracion-tipos-membresia` (aquí se **usan**, no se definen).
-- **Procesamiento de pagos** — no hay pasarela, no se factura (misión). El staff confirma el pago fuera del sistema.
+- **Procesamiento de pagos** — no hay pasarela, no se factura (misión). El staff confirma el pago fuera del sistema; `monto`/`nota` son solo trazabilidad interna, no una integración de cobro.
 - **Renovación automática** (cron/recurrente) — manual, iniciada por el staff.
-
-## Duda abierta (a confirmar, no invento la respuesta)
-
-- **RN-07 (borrado de usuario):** se implementa como **anonimización/tombstone** de la fila `User` (se vacía la PII y se conserva el `id`) para no romper la FK `CheckIn.usuario_id`. Alternativa (borrado físico con `usuario_id` nulo) descartada por trazabilidad. Confirmar con el equipo.
-- **Granularidad del permiso de renovación:** ¿cualquier Empleado puede renovar, o es un permiso aparte dentro de RBAC (ej. solo quien atiende ventanilla/caja)? El RBAC actual (`003`) solo distingue Empleado/Administrador a nivel general. Confirmar si vale la pena para el alcance académico o si el rol genérico basta.
-- **¿Se puede cambiar de `MembershipType` al renovar (upgrade/downgrade)?** No hay dato de origen. Si no se permite, simplificar a "renovar con el mismo tipo que ya tenía".
-- **¿Puede el socio renovar antes de que venza (renovación anticipada)?** ¿La nueva `Membership` empieza el día que renueva, o el día siguiente al vencimiento de la anterior (para no perder días pagados)? No especificado — confirmar.
-- **¿Registro de "pago recibido"?** ¿El staff deja alguna anotación/comprobante (aunque sea texto libre), o la renovación en sí ya implica que el pago se verificó fuera del sistema? Propuesta mínima: no agregar campo de pago — confirmar si el equipo quiere más trazabilidad que eso.
+- **CRUD del catálogo de permisos** (crear/eliminar códigos de permiso nuevos) — el catálogo (`permisos`) se sigue sembrando por migración, como en `003`. `004` solo agrega la relación usuario↔permiso (`usuario_permisos`).
