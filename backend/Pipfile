@@ -10,11 +10,10 @@ sqlalchemy = "*"
 alembic = "*"
 psycopg2-binary = "*"
 pydantic = "*"
-passlib = {extras = ["bcrypt"], version = "*"}
+pwdlib = {extras = ["argon2"], version = "*"}
 python-multipart = "*"
 pydantic-settings = "*"
 pyjwt = "*"
-bcrypt = "<4.1"
 
 [dev-packages]
 pytest = "*"

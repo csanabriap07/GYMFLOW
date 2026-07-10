@@ -15,8 +15,8 @@ function LoginForm() {
   const mutation = useMutation({
     mutationFn: () => postLogin(email, password),
     onSuccess: (data) => {
-      auth.login(data.access_token, data.rol);
-      navigate('/staff/dispositivos-bloqueados', { replace: true });
+      auth.login(data.access_token, data.rol, data.permisos);
+      navigate('/staff/home', { replace: true });
     },
   });
 

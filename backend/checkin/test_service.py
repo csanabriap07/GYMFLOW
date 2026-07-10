@@ -57,6 +57,7 @@ def _crear_socio(db, visitas_restantes=5, dias_vencimiento=30):
         fecha_inicio=date.today(),
         fecha_vencimiento=date.today() + timedelta(days=dias_vencimiento),
         estado=EstadoMembresia.activa,
+        monto=tipo.precio_base,
     )
     db.add(membership)
     db.commit()

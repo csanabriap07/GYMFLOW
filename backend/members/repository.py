@@ -16,3 +16,20 @@ class MembersRepository:
 
     def get_by_email(self, email: str) -> User | None:
         return self.db.query(User).filter(User.email == email).first()
+
+    def get_by_id(self, user_id: int) -> User | None:
+        return self.db.query(User).filter(User.id == user_id).first()
+
+    def list_all(self) -> list[User]:
+        return self.db.query(User).order_by(User.id).all()
+
+    def create(self, user: User) -> User:
+        self.db.add(user)
+        self.db.flush()
+        return user
+
+    def update(self, user: User, **fields) -> User:
+        for key, value in fields.items():
+            setattr(user, key, value)
+        self.db.flush()
+        return user

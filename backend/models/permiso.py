@@ -5,6 +5,7 @@ tiene implícitamente todos los permisos (ver auth/dependencies.py), no
 necesita filas en `usuario_permisos`.
 """
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
+from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
 
@@ -19,6 +20,6 @@ usuario_permisos = Table(
 class Permiso(Base):
     __tablename__ = "permisos"
 
-    id = Column(Integer, primary_key=True, index=True)
-    codigo = Column(String(100), unique=True, nullable=False, index=True)
-    descripcion = Column(String(255), nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    codigo: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    descripcion: Mapped[str | None] = mapped_column(String(255))

@@ -29,12 +29,18 @@ STAFF = [
     ("admin@gymflow.test", RolUsuario.administrador),
 ]
 
-# Permisos individuales de ejemplo (ver spec/features/003-autenticacion-segura):
-# se le otorgan solo al empleado, para poder probar la diferencia entre "rol"
-# y "permiso" — el administrador no los necesita (los tiene implícitos).
+# Permisos individuales de ejemplo (ver spec/features/003-autenticacion-segura
+# y 004-gestion-usuarios): se le otorgan solo al empleado, para poder probar
+# la diferencia entre "rol" y "permiso" — el administrador no los necesita
+# (los tiene implícitos). Para probar el CASO SIN permisos (ej. un Empleado
+# que no debería poder gestionar usuarios), crear un segundo usuario de rol
+# empleado a mano y no otorgarle nada.
 PERMISOS_PARA_EMPLEADO = (
     "checkin.ver_dispositivos_bloqueados",
     "checkin.desbloquear_dispositivo",
+    "members.gestionar_usuarios",
+    "members.asignar_rol_empleado",
+    "membership.renovar",
 )
 
 

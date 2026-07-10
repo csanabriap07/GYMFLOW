@@ -5,7 +5,9 @@ import type { Rol } from '../api/auth';
 export interface AuthContextValue {
   isAuthenticated: boolean;
   rol: Rol | null;
-  login: (token: string, rol: Rol) => void;
+  permisos: string[];
+  hasPermission: (codigo: string) => boolean;
+  login: (token: string, rol: Rol, permisos: string[]) => void;
   logout: () => void;
 }
 

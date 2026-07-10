@@ -8,19 +8,25 @@ spec/features/003-autenticacion-segura, no aquí.
 from datetime import datetime, timedelta, timezone as dt_timezone
 
 import jwt
-from passlib.context import CryptContext
+from pwdlib import PasswordHash
+from pwdlib.exceptions import PwdlibError
 
 from core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_password_hasher = PasswordHash.recommended()
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return _password_hasher.hash(password)
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return pwd_context.verify(password, password_hash)
+    # Un hash con formato irreconocible (ej. de un algoritmo ya no soportado)
+    # debe fallar la verificación, no tumbar el request con un 500.
+    try:
+        return _password_hasher.verify(password, password_hash)
+    except PwdlibError:
+        return False
 
 
 def create_access_token(data: dict, expires_minutes: int | None = None) -> str:
