@@ -24,9 +24,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - "5432:5432"
-
   backend:
     build:
       context: ./backend
@@ -44,9 +41,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - "8000:8000"
-
   frontend:
     build:
       context: ./frontend
@@ -54,9 +48,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    ports:
-      - "5173:80"
-
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
