@@ -1,6 +1,6 @@
 # 007 · Resumen de membresía
 
-**Estado:** implementada
+**Estado:** propuesta
 
 **Traza:** HU-06 · RF-04 · (integra el semáforo de `001`)
 
