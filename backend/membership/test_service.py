@@ -1,6 +1,6 @@
 """
 Tests de membership/service.py contra los criterios de aceptación de
-spec/features/004-gestion-usuarios/spec.md (asignación y renovación).
+HU-07 — Gestión de usuarios (asignación y renovación).
 """
 from datetime import timedelta
 from decimal import Decimal
@@ -126,7 +126,7 @@ def test_renew_membership_permite_upgrade_downgrade(db):
 
 
 def test_renovacion_anticipada_no_deja_doble_activa_para_el_motor_de_checkin(db):
-    """Hallazgo de plan.md de 004: si la anterior sigue "vigente" (fecha_inicio
+    """Hallazgo durante HU-07: si la anterior sigue "vigente" (fecha_inicio
     <= hoy <= fecha_vencimiento) y la nueva empieza en el futuro,
     get_active_membership debe seguir devolviendo LA ANTERIOR (la que
     realmente está en ventana hoy), no la nueva fila futura."""

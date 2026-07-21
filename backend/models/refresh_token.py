@@ -1,5 +1,5 @@
 """
-Tabla `refresh_tokens` — dueño: auth (spec/features/011-portal-miembro-autenticacion).
+Tabla `refresh_tokens` — dueño: el módulo auth (Portal del Miembro, RF-02/RF-04).
 Sesión larga del Miembro: se guarda el SHA-256 del token opaco, nunca el token
 en claro. Rotación: al usarse se marca `revocado_en` y se emite uno nuevo con
 la ventana deslizante de 7 días renovada.

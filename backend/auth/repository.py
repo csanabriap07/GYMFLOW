@@ -1,8 +1,8 @@
 """
 Repository de auth — único punto de acceso a las tablas `permisos` y
-`usuario_permisos` (spec/features/003-autenticacion-segura) y `refresh_tokens`
-(spec/features/011-portal-miembro-autenticacion). `auth` sigue sin repository
-para `usuarios`: eso sigue siendo de members (AGENTS.md).
+`usuario_permisos` (HU-10 — Autenticación segura) y `refresh_tokens`
+(Portal del Miembro, RF-02/RF-04). `auth` sigue sin repository
+para `usuarios`: esa tabla es del módulo members.
 """
 from datetime import datetime
 
@@ -30,7 +30,7 @@ class AuthRepository:
     def list_catalog(self) -> list[Permiso]:
         """Todo el catálogo de permisos (no solo los otorgados a un usuario) —
         para que un administrador vea qué códigos existen antes de otorgar
-        uno (004)."""
+        uno (HU-07)."""
         return self.db.query(Permiso).order_by(Permiso.codigo).all()
 
     def list_granted(self, usuario_id: int) -> list[Permiso]:
@@ -64,7 +64,7 @@ class AuthRepository:
 
 
 class RefreshTokenRepository:
-    """Tabla `refresh_tokens` (011): sesión larga del Miembro. Solo se
+    """Tabla `refresh_tokens` (Portal del Miembro): sesión larga del Miembro. Solo se
     persiste el hash del token; la generación/hash vive en auth/service."""
 
     def __init__(self, db: Session):

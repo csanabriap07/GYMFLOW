@@ -52,9 +52,9 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('usuario_id', 'permiso_id')
     )
     # NOTA: autogenerate detectó como "removido" el índice único parcial
-    # ix_checkins_usuario_dia_activo de 001 (creado con SQL crudo, Alembic no
+    # ix_checkins_usuario_dia_activo de HU-01 (creado con SQL crudo, Alembic no
     # lo reconoce como metadata ORM) y proponía un DROP INDEX — se quita a
-    # mano, igual que en e8bdfb173fb7 (002); ese índice sigue vigente.
+    # mano, igual que en e8bdfb173fb7 (HU-02); ese índice sigue vigente.
     # ### end Alembic commands ###
     op.bulk_insert(permisos_table, _CATALOGO_INICIAL)
 

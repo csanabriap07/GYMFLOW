@@ -1,6 +1,6 @@
 """
 Tests de members/service.py contra los criterios de aceptación de
-spec/features/004-gestion-usuarios/spec.md (CRUD de usuarios y RN-07).
+HU-07 — Gestión de usuarios (CRUD de usuarios y RN-07).
 """
 from decimal import Decimal
 
@@ -121,7 +121,7 @@ def test_assign_membership_usuario_inexistente(db):
         assign_membership(9999, tipo.id, Decimal("50000"), None, db)
 
 
-# --- puede_asignar_rol: quién puede crear/ascender a qué rol (hallazgo posterior a 004) ---
+# --- puede_asignar_rol: quién puede crear/ascender a qué rol (hallazgo posterior a HU-07) ---
 
 
 def test_puede_asignar_rol_administrador_solo_administrador():

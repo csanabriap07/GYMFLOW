@@ -1,7 +1,7 @@
 """
 Repository de membership — único punto de acceso a `membresias` y
-`tipos_membresia` (AGENTS.md). Métodos concretos se agregan al implementar
-spec/features/001, 004, 007, 009.
+`tipos_membresia` (convención del proyecto). Cubre HU-01, HU-06, HU-07 y
+HU-08.
 """
 from datetime import date
 
@@ -76,7 +76,7 @@ class MembershipRepository:
         return membership
 
     def get_for_update(self, membership_id: int) -> Membership:
-        """SELECT ... FOR UPDATE — serializa descuentos concurrentes (plan.md de 001)."""
+        """SELECT ... FOR UPDATE — serializa descuentos concurrentes (RN-10)."""
         return (
             self.db.query(Membership)
             .filter(Membership.id == membership_id)

@@ -1,7 +1,7 @@
 import axios, { isAxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-// Sesión del Miembro (011): el access token vive SOLO en memoria (nunca
-// localStorage — decisión de spec/features/011, cookie httpOnly para el
+// Sesión del Miembro (RF-02/RF-04): el access token vive SOLO en memoria (nunca
+// localStorage — decisión de seguridad del equipo, cookie httpOnly para el
 // refresh). Al recargar la página se recupera con un refresh silencioso.
 let accessToken: string | null = null;
 

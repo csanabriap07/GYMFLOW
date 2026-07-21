@@ -1,5 +1,5 @@
 """
-Tabla `usuarios` — dueño: members (ver tech-stack.md).
+Tabla `usuarios` — dueño: el módulo members.
 """
 import enum
 from datetime import datetime
@@ -27,7 +27,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     # nullable=True: RN-07 anonimiza (borra PII) preservando la fila para el
-    # histórico de CheckIn (FK usuario_id). Ver duda abierta en 004-gestion-usuarios.
+    # histórico de CheckIn (FK usuario_id). Duda abierta de HU-07.
     cedula: Mapped[str | None] = mapped_column(String(20), unique=True, index=True)
     nombre: Mapped[str | None] = mapped_column(String(150))
     email: Mapped[str | None] = mapped_column(String(150), unique=True)
@@ -39,6 +39,6 @@ class User(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
-    # NOTA (duda abierta 005-cortesia-primer-dia): la marca de "cortesía usada" /
+    # NOTA (duda abierta de HU-04 — Cortesía de primer día): la marca de "cortesía usada" /
     # rol Prospecto NO se agrega en este scaffold. Se define junto con el equipo
     # al implementar esa feature, vía migración Alembic dedicada.

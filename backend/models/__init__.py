@@ -1,5 +1,5 @@
 """
-Modelos SQLAlchemy centralizados (backend/models/, según AGENTS.md y tech-stack.md).
+Modelos SQLAlchemy centralizados (backend/models/, convención del proyecto).
 Un archivo por entidad. Se importan todos aquí para que Alembic los detecte
 en autogenerate (ver backend/alembic/env.py).
 """

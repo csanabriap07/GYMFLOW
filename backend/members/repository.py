@@ -1,6 +1,6 @@
 """
-Repository de members — único punto de acceso a la tabla `usuarios` (AGENTS.md).
-Métodos concretos se agregan al implementar spec/features/001, 004, 005, 006.
+Repository de members — único punto de acceso a la tabla `usuarios`
+(convención del proyecto). Cubre HU-01, HU-03, HU-04 y HU-07.
 """
 from sqlalchemy.orm import Session
 

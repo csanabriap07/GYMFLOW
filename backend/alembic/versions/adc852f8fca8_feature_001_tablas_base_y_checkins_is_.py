@@ -1,4 +1,4 @@
-"""feature 001: tablas base y checkins.is_active
+"""HU-01: tablas base y checkins.is_active
 
 Revision ID: adc852f8fca8
 Revises: 
@@ -84,7 +84,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_membresias_miembro_id'), 'membresias', ['miembro_id'], unique=False)
     # ### end Alembic commands ###
 
-    # Índice único parcial (RN-02, spec.md de 001): a lo sumo un checkin
+    # Índice único parcial (RN-02, HU-01): a lo sumo un checkin
     # is_active=true por usuario y día calendario del gimnasio (America/Bogota).
     # Expression index, no lo genera autogenerate — blinda el Filtro 1 contra
     # condiciones de carrera (dos check-ins simultáneos del mismo socio).

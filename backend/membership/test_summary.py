@@ -1,7 +1,7 @@
 """
-Tests del resumen de membresía (007, RF-04): GET /membresias/me/resumen y
+Tests del resumen de membresía (HU-06, RF-04): GET /membresias/me/resumen y
 get_membership_summary_detail — contra los criterios de aceptación de
-spec/features/007-resumen-membresia/spec.md.
+HU-06 — Resumen de membresía.
 """
 from datetime import datetime, timedelta
 from decimal import Decimal

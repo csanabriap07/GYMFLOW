@@ -1,7 +1,7 @@
 """
-Schemas Pydantic de checkin (entrada/salida de API). Se agregan al implementar
-spec/features/001, 002, 005, 006/. Toda validación de entrada vive aquí, nunca a
-mano en el router (AGENTS.md).
+Schemas Pydantic de checkin (entrada/salida de API) — HU-01, HU-02, HU-04 y
+HU-05. Toda validación de entrada vive aquí, nunca a mano en el router
+(convención del proyecto).
 """
 import enum
 from datetime import date, datetime
@@ -16,8 +16,8 @@ class CheckinResultado(str, enum.Enum):
 
 
 class RazonDenegacion(str, enum.Enum):
-    """spec.md de 002 — sin `YA_INGRESO_HOY`: un reingreso el mismo día es
-    Exitoso (ver 001), no una razón de denegación."""
+    """HU-02 — sin `YA_INGRESO_HOY`: un reingreso el mismo día es
+    Exitoso (HU-01, RN-02), no una razón de denegación."""
 
     membresia_vencida = "MEMBRESIA_VENCIDA"
     sin_visitas = "SIN_VISITAS"

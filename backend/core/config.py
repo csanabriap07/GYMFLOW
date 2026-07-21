@@ -1,5 +1,5 @@
 """
-Configuración central del backend (core, según AGENTS.md).
+Configuración central del backend (módulo core).
 Lee variables de entorno / .env vía pydantic-settings.
 """
 from datetime import datetime
@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     member_access_token_minutes: int = 15
     member_refresh_days: int = 7
     # Zona horaria del gimnasio, usada para calcular "día calendario" (RN-02) y
-    # ventanas temporales (RN-04). Centralizada aquí según plan.md de 001.
+    # ventanas temporales (RN-04). Centralizada aquí para toda la app.
     timezone: str = "America/Bogota"
     environment: str = "development"
 

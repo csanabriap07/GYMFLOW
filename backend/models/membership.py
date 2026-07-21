@@ -1,5 +1,5 @@
 """
-Tabla `membresias` — dueño: membership (ver tech-stack.md).
+Tabla `membresias` — dueño: el módulo membership.
 """
 import enum
 from datetime import date

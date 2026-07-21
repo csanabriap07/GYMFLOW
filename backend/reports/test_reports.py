@@ -1,6 +1,6 @@
 """
-Tests de 010-reportes-asistencia contra los criterios de aceptación de
-spec/features/010-reportes-asistencia/spec.md: filtro por rango, unidad de
+Tests contra los criterios de aceptación de HU-09 — Reportes de
+asistencia (RF-12, RF-13): filtro por rango, unidad de
 conteo (día de asistencia, no reingresos), export XLSX/CSV con los mismos
 datos, RBAC solo Administrador, inmutabilidad y rango vacío/ inválido.
 """

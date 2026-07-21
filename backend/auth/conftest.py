@@ -1,6 +1,6 @@
 """
-Fixtures compartidas de los tests de auth. Como 004-gestion-usuarios (CRUD)
-todavía no existe, los usuarios de staff y sus permisos se siembran directo
+Fixtures compartidas de los tests de auth. Como el CRUD de HU-07 — Gestión
+de usuarios todavía no existía, los usuarios de staff y sus permisos se siembran directo
 por SQLAlchemy — mismo patrón que checkin/test_service.py usa para socios.
 """
 import pytest

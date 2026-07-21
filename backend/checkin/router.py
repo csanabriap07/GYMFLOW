@@ -1,7 +1,7 @@
 """
-Router de checkin (spec/features/001-checkin-membresia-activa,
-002-acceso-denegado). Validación de entrada con Pydantic
-(checkin/schemas.py), nunca a mano aquí (AGENTS.md).
+Router de checkin (HU-01 — Check-in con membresía activa y HU-02 — Acceso
+denegado). Validación de entrada con Pydantic (checkin/schemas.py), nunca a
+mano aquí (convención del proyecto).
 """
 from typing import Literal
 
@@ -28,8 +28,8 @@ def enforce_device_not_locked(
     db: Session = Depends(get_db),
     x_device_id: str | None = Header(default=None),
 ) -> str:
-    """RN-03 (002-acceso-denegado): id estable que manda el kiosko, con
-    fallback a IP si falta el header (duda abierta de spec.md, resuelta así)."""
+    """RN-03 (HU-02 — Acceso denegado): id estable que manda el kiosko, con
+    fallback a IP si falta el header (decisión del equipo)."""
     device_id = x_device_id or (request.client.host if request.client else "desconocido")
     lock_repo = CheckinDeviceLockRepository(db)
     momento = _now()

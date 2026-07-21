@@ -7,7 +7,7 @@ interface NumericKeypadProps {
 
 const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'borrar', '0', 'enviar'];
 
-// Botones táctiles grandes (≥48x48px, RNF usabilidad de tech-stack.md) para
+// Botones táctiles grandes (≥48x48px, RNF de usabilidad) para
 // que el kiosko no dependa de un teclado físico.
 function NumericKeypad({ onDigit, onBackspace, onSubmit, disabled }: NumericKeypadProps) {
   return (

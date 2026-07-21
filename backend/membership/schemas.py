@@ -1,7 +1,7 @@
 """
-Schemas Pydantic de membership (entrada/salida de API). Se agregan al implementar
-spec/features/001, 007, 009/. Toda validación de entrada vive aquí, nunca a
-mano en el router (AGENTS.md).
+Schemas Pydantic de membership (entrada/salida de API) — HU-01, HU-06 y
+HU-08. Toda validación de entrada vive aquí, nunca a mano en el router
+(convención del proyecto).
 """
 from datetime import date
 from decimal import Decimal
@@ -54,8 +54,8 @@ class MembershipTypeAdminOut(MembershipTypeOut):
 
 
 class MembershipTypeCreate(BaseModel):
-    """Alta de un tipo de membresía (009, RF-11). Validaciones aquí, nunca a
-    mano en el router (AGENTS.md)."""
+    """Alta de un tipo de membresía (HU-08, RF-11). Validaciones aquí, nunca a
+    mano en el router (convención del proyecto)."""
 
     nombre: str = Field(min_length=1, max_length=100)
     precio_base: Decimal = Field(ge=0)

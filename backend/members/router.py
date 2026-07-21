@@ -1,6 +1,6 @@
 """
-Router de members (spec/features/004-gestion-usuarios). Validación de entrada
-con Pydantic (members/schemas.py), nunca a mano aquí (AGENTS.md).
+Router de members (HU-07 — Gestión de usuarios, RF-10). Validación de entrada
+con Pydantic (members/schemas.py), nunca a mano aquí (convención del proyecto).
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -33,8 +33,8 @@ router = APIRouter(prefix="/usuarios", tags=["members"])
 
 _STAFF = Depends(require_role(RolUsuario.empleado, RolUsuario.administrador))
 # CRUD básico de usuarios: gateado con un permiso individual propio, no solo
-# el rol Empleado/Administrador (RF-09) — decisión del equipo posterior a la
-# spec original de 004, distinta de members.asignar_rol_empleado (ese
+# el rol Empleado/Administrador (RF-09) — decisión del equipo posterior al
+# alcance original de HU-07, distinta de members.asignar_rol_empleado (ese
 # controla A QUÉ ROL se puede crear/ascender, no si se puede gestionar
 # usuarios en general). Los sub-recursos de membresías (asignar/historial)
 # siguen con el guard de rol genérico, sin cambios.

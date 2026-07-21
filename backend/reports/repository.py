@@ -1,15 +1,12 @@
 """
 Repository de reports — lectura agregada sobre `checkins` para
-spec/features/010-reportes-asistencia.
+HU-09 — Reportes de asistencia.
 
-NOTA (discrepancia marcada en 010/spec.md): tech-stack.md describe este
-repository como "lectura agregada sobre CheckIn", pero `CheckIn` es propiedad
-de `checkin` y el límite duro prohíbe queries cruzadas saltándose el service
-del módulo dueño. Resolución a implementar en 010: `reports.service` debe
-pedir los datos vía `checkin.service` (no vía este repository contra la tabla
-ajena) — o, si el equipo confirma una excepción explícita para reportes de
-solo lectura, documentarla aquí antes de implementarla. No asumido en este
-scaffold.
+NOTA: aunque el diseño inicial describía este repository como "lectura
+agregada sobre CheckIn", `CheckIn` es propiedad del módulo checkin y la regla
+de módulos prohíbe queries cruzadas saltándose el service del módulo dueño.
+Resolución adoptada en HU-09: `reports.service` pide los datos vía
+`checkin.service` (no vía este repository contra la tabla ajena).
 """
 from sqlalchemy.orm import Session
 

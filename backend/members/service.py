@@ -1,7 +1,7 @@
 """
 Servicio de members.
 
-Regla de módulos (no negociable, AGENTS.md): este service es el ÚNICO punto de
+Regla de módulos del proyecto (no negociable): este service es el ÚNICO punto de
 entrada que otros módulos pueden llamar para leer/mutar datos de members.
 Ningún otro módulo debe importar members/repository.py directamente.
 """
@@ -16,20 +16,20 @@ from models import EstadoUsuario, Membership, RolUsuario, User
 
 
 class UsuarioNoEncontradoError(Exception):
-    """El `user_id` pedido no existe (004)."""
+    """El `user_id` pedido no existe (HU-07)."""
 
 
 class CedulaYaRegistradaError(Exception):
-    """Ya existe un usuario con esa cédula (004) — se valida antes del
+    """Ya existe un usuario con esa cédula (HU-07) — se valida antes del
     INSERT/UPDATE para no dejar reventar un IntegrityError sin capturar."""
 
 
 class EmailYaRegistradoError(Exception):
-    """Ya existe un usuario con ese email (004), misma razón que arriba."""
+    """Ya existe un usuario con ese email (HU-07), misma razón que arriba."""
 
 
 class RolNoPermitidoError(Exception):
-    """El actor no puede crear/ascender un usuario al rol pedido (004): ver
+    """El actor no puede crear/ascender un usuario al rol pedido (HU-07, RF-09): ver
     `puede_asignar_rol`."""
 
 
@@ -37,13 +37,23 @@ PERMISO_ASIGNAR_ROL_EMPLEADO = "members.asignar_rol_empleado"
 
 
 def puede_asignar_rol(actor_rol: RolUsuario, actor_permisos: set[str], rol_objetivo: RolUsuario) -> bool:
-    """Quién puede crear un usuario con `rol_objetivo`, o ascender uno
-    existente a ese rol (decisión del equipo, 004):
-    - `administrador`: reservado exclusivamente al rol administrador, ningún
-      permiso individual lo habilita.
-    - `empleado`: administrador, o un empleado con el permiso individual
-      `members.asignar_rol_empleado`.
-    - `miembro`/`invitado`: cualquier staff autenticado (sin restricción extra)."""
+    """Determina si el actor puede crear o ascender un usuario a ``rol_objetivo``.
+
+    - ``administrador``: reservado exclusivamente a un actor administrador,
+      ningún permiso individual lo habilita.
+    - ``empleado``: administrador, o un empleado con el permiso individual
+      ``members.asignar_rol_empleado``.
+    - ``miembro``/``invitado``: cualquier staff autenticado, sin restricción
+      extra.
+
+    Args:
+        actor_rol: Rol del usuario que hace la petición.
+        actor_permisos: Códigos de permiso individuales del actor.
+        rol_objetivo: Rol que se quiere asignar/ascender.
+
+    Returns:
+        ``True`` si el actor puede asignar ese rol.
+    """
     if rol_objetivo == RolUsuario.administrador:
         return actor_rol == RolUsuario.administrador
     if rol_objetivo == RolUsuario.empleado:
@@ -60,6 +70,11 @@ def get_user_by_email(email: str, db: Session) -> User | None:
 
 
 def get_user(user_id: int, db: Session) -> User:
+    """Busca un usuario por ID.
+
+    Raises:
+        UsuarioNoEncontradoError: si ``user_id`` no existe.
+    """
     user = MembersRepository(db).get_by_id(user_id)
     if user is None:
         raise UsuarioNoEncontradoError()
@@ -71,9 +86,17 @@ def list_users(db: Session) -> list[User]:
 
 
 def get_users_by_ids(user_ids: list[int], db: Session) -> dict[int, User]:
-    """010: resuelve nombres de usuarios en lote (evita N+1 al enriquecer el
-    reporte de asistencias). Punto de entrada del módulo dueño de `usuarios`
-    para que `reports` no consulte esa tabla directamente (regla de módulos)."""
+    """Resuelve varios usuarios en lote (evita N+1 al enriquecer el reporte
+    de asistencias, HU-09). Punto de entrada del módulo dueño de ``usuarios``
+    para que ``reports`` no consulte esa tabla directamente.
+
+    Args:
+        user_ids: IDs a resolver.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        Diccionario ``{user_id: User}``; los IDs sin usuario no aparecen.
+    """
     return {u.id: u for u in MembersRepository(db).list_by_ids(user_ids)}
 
 
@@ -99,6 +122,22 @@ def create_user(
     password: str | None,
     db: Session,
 ) -> User:
+    """Crea un usuario.
+
+    Args:
+        cedula: Cédula única del usuario.
+        nombre: Nombre completo.
+        email: Correo único, o ``None``.
+        rol: Rol asignado.
+        estado: Estado inicial.
+        password: Contraseña en texto plano a hashear, o ``None`` para
+            crear el usuario sin contraseña (activación posterior).
+        db: Sesión de base de datos activa.
+
+    Raises:
+        CedulaYaRegistradaError: si ``cedula`` ya está registrada.
+        EmailYaRegistradoError: si ``email`` ya está registrado.
+    """
     _validar_unicidad(db, cedula, email)
     user = User(
         cedula=cedula,
@@ -114,6 +153,21 @@ def create_user(
 
 
 def update_user(user_id: int, db: Session, **fields) -> User:
+    """Actualiza los campos dados de un usuario.
+
+    Args:
+        user_id: ID del usuario a actualizar.
+        db: Sesión de base de datos activa.
+        **fields: Campos a modificar (p. ej. ``cedula``, ``email``,
+            ``password``); ``password`` se hashea antes de guardarse.
+
+    Raises:
+        UsuarioNoEncontradoError: si ``user_id`` no existe.
+        CedulaYaRegistradaError: si la nueva ``cedula`` ya está en uso por
+            otro usuario.
+        EmailYaRegistradoError: si el nuevo ``email`` ya está en uso por
+            otro usuario.
+    """
     user = get_user(user_id, db)
     cedula = fields.get("cedula", user.cedula)
     email = fields.get("email", user.email)
@@ -129,10 +183,17 @@ def update_user(user_id: int, db: Session, **fields) -> User:
 
 
 def anonymize_user(user_id: int, db: Session) -> User:
-    """RN-07: borra PII de forma irreversible pero conserva la fila (y su
-    `id`) para no romper la FK de `CheckIn.usuario_id` — el histórico de
-    check-ins del usuario se preserva. `estado=inactivo` ya bloquea el login;
-    limpiar `password_hash` también es higiene extra de credenciales."""
+    """Borra la PII del usuario de forma irreversible (RN-07), preservando la
+    fila (y su ``id``) para no romper la FK de ``CheckIn.usuario_id`` — el
+    histórico de check-ins del usuario se conserva.
+
+    Args:
+        user_id: ID del usuario a anonimizar.
+        db: Sesión de base de datos activa.
+
+    Raises:
+        UsuarioNoEncontradoError: si ``user_id`` no existe.
+    """
     user = get_user(user_id, db)
     user = MembersRepository(db).update(
         user,

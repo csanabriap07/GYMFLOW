@@ -1,6 +1,6 @@
 """
 Tests de membership/service.py para el CRUD de tipos de membresía
-(spec/features/009-configuracion-tipos-membresia). Cubre RN-05 (bloqueo de
+(HU-08 — Configuración de membresías, RF-11). Cubre RN-05 (bloqueo de
 desactivación/eliminación) y RN-06 (editar el tipo no altera contratos vigentes).
 """
 from decimal import Decimal
