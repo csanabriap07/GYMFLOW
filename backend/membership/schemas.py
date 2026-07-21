@@ -1,7 +1,7 @@
 """
-Schemas Pydantic de membership (entrada/salida de API). Se agregan al implementar
-spec/features/001, 007, 009/. Toda validación de entrada vive aquí, nunca a
-mano en el router (AGENTS.md).
+Schemas Pydantic de membership (entrada/salida de API) — HU-01, HU-06 y
+HU-08. Toda validación de entrada vive aquí, nunca a mano en el router
+(convención del proyecto).
 """
 from datetime import date
 from decimal import Decimal
@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class MembershipSummary(BaseModel):
-    """Mínimo del semáforo (001); el detalle completo lo amplía 007."""
+    """Mínimo del semáforo (HU-01); el detalle completo lo amplía HU-06."""
 
     tipo: str
     visitas_restantes: int
@@ -19,7 +19,7 @@ class MembershipSummary(BaseModel):
 
 
 class MembershipSummaryOut(BaseModel):
-    """Resumen completo del portal del socio (007, RF-04). Solo datos de
+    """Resumen completo del portal del socio (HU-06, RF-04). Solo datos de
     membresía, sin PII. `dias_restantes` se calcula en cada consulta
     (`fecha_vencimiento - hoy`), nunca se almacena; es `None` cuando no hay
     membresía vigente (ya venció: no aplica contar días)."""
@@ -34,7 +34,7 @@ class MembershipSummaryOut(BaseModel):
 
 class MembershipTypeOut(BaseModel):
     """Lectura mínima de `MembershipType` para elegir un tipo al
-    asignar/renovar (004) — el CRUD completo es de `009`."""
+    asignar/renovar (HU-07) — el CRUD completo es de HU-08."""
 
     id: int
     nombre: str
@@ -47,15 +47,15 @@ class MembershipTypeOut(BaseModel):
 
 
 class MembershipTypeAdminOut(MembershipTypeOut):
-    """Lectura completa para el CRUD del Administrador (009): añade `activo`,
+    """Lectura completa para el CRUD del Administrador (HU-08): añade `activo`,
     que el `GET /membresias/tipos` de empleado (solo activos) no expone."""
 
     activo: bool
 
 
 class MembershipTypeCreate(BaseModel):
-    """Alta de un tipo de membresía (009, RF-11). Validaciones aquí, nunca a
-    mano en el router (AGENTS.md)."""
+    """Alta de un tipo de membresía (HU-08, RF-11). Validaciones aquí, nunca a
+    mano en el router (convención del proyecto)."""
 
     nombre: str = Field(min_length=1, max_length=100)
     precio_base: Decimal = Field(ge=0)
@@ -66,7 +66,7 @@ class MembershipTypeCreate(BaseModel):
 
 
 class MembershipTypeUpdate(BaseModel):
-    """Edición parcial de un tipo (009). Todos los campos opcionales; solo se
+    """Edición parcial de un tipo (HU-08). Todos los campos opcionales; solo se
     aplican los enviados (`exclude_unset`). RN-06: editar aquí nunca recalcula
     los saldos de `Membership` ya vendidas (son snapshot)."""
 

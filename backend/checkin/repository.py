@@ -1,6 +1,6 @@
 """
-Repository de checkin — único punto de acceso a la tabla `checkins` (AGENTS.md).
-Métodos concretos se agregan al implementar spec/features/001, 002, 005, 006.
+Repository de checkin — único punto de acceso a la tabla `checkins`
+(convención del proyecto). Cubre HU-01, HU-02, HU-04 y HU-05.
 """
 from datetime import date, datetime, timedelta
 
@@ -22,7 +22,7 @@ class CheckinRepository:
     def exists_successful_checkin_today(self, user_id: int, hoy: date) -> bool:
         """RN-02 (Filtro 1): filtra explícitamente por día calendario (zona
         horaria del gimnasio) además de `is_active` — un `is_active=true` de
-        un día anterior no cuenta (ver spec.md de 001)."""
+        un día anterior no cuenta (HU-01)."""
         dia_gimnasio = func.date(func.timezone(settings.timezone, CheckIn.fecha_hora))
         return (
             self.db.query(CheckIn)
@@ -44,7 +44,7 @@ class CheckinRepository:
         """010 (RF-12): asistencias en el rango [fecha_inicio, fecha_fin] (días
         calendario del gimnasio, ambos inclusive). Solo filas `is_active=true`
         —la "unidad de conteo es día de asistencia", así los reingresos del
-        mismo día (`is_active=false`) no inflan el reporte (ver spec.md de 010).
+        mismo día (`is_active=false`) no inflan el reporte (HU-09, RF-12).
         Ordenado por `fecha_hora` ascendente. Consulta sobre la tabla propia."""
         dia_gimnasio = func.date(func.timezone(settings.timezone, CheckIn.fecha_hora))
         return (
@@ -115,7 +115,7 @@ class CheckinDeviceLockRepository:
 
     def register_failed_attempt(self, device_id: str, momento: datetime) -> None:
         """Solo se llama para denegaciones por CEDULA_NO_ENCONTRADA (RN-03,
-        spec.md de 002) — MEMBRESIA_VENCIDA/SIN_VISITAS no cuentan."""
+        HU-02) — MEMBRESIA_VENCIDA/SIN_VISITAS no cuentan."""
         lock = self._get_or_create(device_id)
         if lock.ventana_inicio is None or momento - lock.ventana_inicio > VENTANA_INTENTOS:
             lock.ventana_inicio = momento
@@ -127,7 +127,7 @@ class CheckinDeviceLockRepository:
         self.db.flush()
 
     def reset_attempts(self, device_id: str) -> None:
-        """Un check-in exitoso reinicia el contador (spec.md de 002)."""
+        """Un check-in exitoso reinicia el contador (RN-03, HU-02)."""
         lock = self._get_or_create(device_id)
         lock.intentos_fallidos = 0
         lock.ventana_inicio = None

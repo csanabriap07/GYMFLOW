@@ -1,6 +1,6 @@
 """
 Tests de auth/service.py contra los criterios de aceptación de
-spec/features/003-autenticacion-segura/spec.md.
+HU-10 — Autenticación segura.
 """
 import pytest
 
@@ -121,7 +121,7 @@ def test_revoke_permission_quita_el_permiso(db, empleado):
 def test_list_permissions_catalog_devuelve_todo_el_catalogo(db):
     codigos = {p.codigo for p in list_permissions_catalog(db)}
 
-    # Sembrados por las migraciones de 003/004 — el catálogo completo, no
+    # Sembrados por las migraciones de HU-10/HU-07 — el catálogo completo, no
     # solo lo otorgado a un usuario en particular.
     assert {
         "checkin.ver_dispositivos_bloqueados",

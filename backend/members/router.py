@@ -1,6 +1,6 @@
 """
-Router de members (spec/features/004-gestion-usuarios). Validación de entrada
-con Pydantic (members/schemas.py), nunca a mano aquí (AGENTS.md).
+Router de members (HU-07 — Gestión de usuarios, RF-10). Validación de entrada
+con Pydantic (members/schemas.py), nunca a mano aquí (convención del proyecto).
 """
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -33,8 +33,8 @@ router = APIRouter(prefix="/usuarios", tags=["members"])
 
 _STAFF = Depends(require_role(RolUsuario.empleado, RolUsuario.administrador))
 # CRUD básico de usuarios: gateado con un permiso individual propio, no solo
-# el rol Empleado/Administrador (RF-09) — decisión del equipo posterior a la
-# spec original de 004, distinta de members.asignar_rol_empleado (ese
+# el rol Empleado/Administrador (RF-09) — decisión del equipo posterior al
+# alcance original de HU-07, distinta de members.asignar_rol_empleado (ese
 # controla A QUÉ ROL se puede crear/ascender, no si se puede gestionar
 # usuarios en general). Los sub-recursos de membresías (asignar/historial)
 # siguen con el guard de rol genérico, sin cambios.
@@ -42,7 +42,7 @@ _GESTIONAR_USUARIOS = Depends(require_permission("members.gestionar_usuarios"))
 
 
 def _validar_rol_permitido(actor_payload: dict, rol_objetivo: RolUsuario, db: Session) -> None:
-    """004: quién puede crear/ascender un usuario a `rol_objetivo` — ver
+    """HU-07: quién puede crear/ascender un usuario a `rol_objetivo` — ver
     members.service.puede_asignar_rol. `administrador` nunca necesita
     permisos individuales para esto."""
     actor_rol = RolUsuario(actor_payload["rol"])
@@ -86,9 +86,9 @@ def get_buscar_usuarios(
     db: Session = Depends(get_db),
     _staff=_GESTIONAR_USUARIOS,
 ) -> list[UserOut]:
-    """008: búsqueda por coincidencia parcial de nombre O cédula en un solo
-    campo. Gateada con el mismo permiso que el listado porque devuelve los
-    mismos datos (decisión del equipo)."""
+    """HU-03: búsqueda por coincidencia parcial de nombre O cédula en un
+    solo campo. Gateada con el mismo permiso que el listado porque devuelve
+    los mismos datos."""
     return [UserOut.model_validate(u) for u in members_service.search_users(q, db)]
 
 

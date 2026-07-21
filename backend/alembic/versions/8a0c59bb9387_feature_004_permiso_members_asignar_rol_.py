@@ -1,4 +1,4 @@
-"""feature 004: permiso members.asignar_rol_empleado
+"""HU-07: permiso members.asignar_rol_empleado
 
 Revision ID: 8a0c59bb9387
 Revises: 1d22a2198fbe

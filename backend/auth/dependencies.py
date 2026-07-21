@@ -16,7 +16,7 @@ from models import RolUsuario
 
 # HTTPBearer, no OAuth2PasswordBearer: solo extrae el header "Authorization:
 # Bearer <token>", sin ninguna semántica de flujo OAuth2 (límite duro de
-# AGENTS.md: "no OAuth2 Authorization Server").
+# de arquitectura: "no OAuth2 Authorization Server").
 _bearer_scheme = HTTPBearer(auto_error=True)
 
 
@@ -24,9 +24,18 @@ def get_current_user(
     response: Response,
     credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
 ) -> dict:
-    """RN-11: valida el JWT y, si sigue vigente, lo reemite con `exp`
-    renovado a +30min en el header de respuesta `X-New-Token` (expiración
-    deslizante — no hay sesión server-side que renovar)."""
+    """Dependencia FastAPI: valida el JWT de staff (RN-11).
+
+    Si el token sigue vigente, lo reemite con ``exp`` renovado a +30 min en
+    el header de respuesta ``X-New-Token`` (expiración deslizante — no hay
+    sesión server-side que renovar).
+
+    Returns:
+        El payload decodificado del JWT (``sub``, ``rol``).
+
+    Raises:
+        HTTPException: 401 si el token expiró o es inválido.
+    """
     try:
         payload = decode_access_token(credentials.credentials)
     except jwt.ExpiredSignatureError:
@@ -42,10 +51,20 @@ def get_current_user(
 def get_current_member(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
 ) -> dict:
-    """011: valida el access token del portal del Miembro. Exige el claim
-    `kind=member` (los JWT de staff de 003 no lo llevan, así una población de
-    tokens no sirve en la otra). Sin expiración deslizante: la renovación del
-    portal es por refresh token (rotación), no por reemisión silenciosa."""
+    """Dependencia FastAPI: valida el access token del Portal del Miembro.
+
+    Exige el claim ``kind=member`` (los JWT de staff no lo llevan, así una
+    población de tokens no sirve en la otra). Sin expiración deslizante: la
+    renovación del portal es por refresh token (rotación), no por reemisión
+    silenciosa.
+
+    Returns:
+        El payload decodificado del JWT (``sub``, ``rol``, ``kind``).
+
+    Raises:
+        HTTPException: 401 si el token expiró o es inválido; 403 si no es
+            un token de Miembro.
+    """
     try:
         payload = decode_access_token(credentials.credentials)
     except jwt.ExpiredSignatureError:
@@ -59,12 +78,24 @@ def get_current_member(
 
 
 def require_member(payload: dict = Depends(get_current_member)) -> dict:
-    """Alias declarativo, simétrico a require_role: Depends(require_member)."""
+    """Alias declarativo, simétrico a :func:`require_role`: ``Depends(require_member)``."""
     return payload
 
 
 def require_role(*roles: RolUsuario):
-    """RBAC declarativo por rol (RF-09): Depends(require_role(RolUsuario.administrador))."""
+    """RBAC declarativo por rol (RF-09).
+
+    Uso: ``Depends(require_role(RolUsuario.administrador))``.
+
+    Args:
+        *roles: Roles permitidos para el endpoint.
+
+    Returns:
+        Una dependencia FastAPI que valida el rol del usuario autenticado.
+
+    Raises:
+        HTTPException: 403 si el rol del usuario no está en ``roles``.
+    """
     permitidos = {r.value for r in roles}
 
     def _verificar(payload: dict = Depends(get_current_user)) -> dict:
@@ -76,10 +107,21 @@ def require_role(*roles: RolUsuario):
 
 
 def require_permission(*codigos: str):
-    """RBAC fino por permiso individual (spec/features/003): el rol
-    `administrador` tiene implícitamente todos los permisos, sin necesidad de
-    filas en `usuario_permisos`. Cualquier otro rol necesita al menos uno de
-    los códigos requeridos otorgado explícitamente."""
+    """RBAC fino por permiso individual (HU-10, RF-09).
+
+    El rol ``administrador`` tiene implícitamente todos los permisos, sin
+    necesidad de filas en ``usuario_permisos``. Cualquier otro rol necesita
+    al menos uno de los códigos requeridos otorgado explícitamente.
+
+    Args:
+        *codigos: Códigos de permiso; basta con tener uno de ellos.
+
+    Returns:
+        Una dependencia FastAPI que valida los permisos del usuario.
+
+    Raises:
+        HTTPException: 403 si el usuario no tiene ninguno de los permisos.
+    """
     requeridos = set(codigos)
 
     def _verificar(

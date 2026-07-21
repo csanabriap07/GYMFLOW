@@ -1,9 +1,9 @@
 """
-Utilidades de seguridad (core, según AGENTS.md): hash de contraseñas y JWT.
+Utilidades de seguridad (módulo core): hash de contraseñas y JWT.
 
 Estas son utilidades técnicas genéricas (RN-12, HU-10) — la lógica de negocio de
-login/roles/expiración deslizante (RN-11) se implementa en `auth/` al construir
-spec/features/003-autenticacion-segura, no aquí.
+login/roles/expiración deslizante (RN-11) se implementa en `auth/`
+(HU-10 — Autenticación segura), no aquí.
 """
 from datetime import datetime, timedelta, timezone as dt_timezone
 

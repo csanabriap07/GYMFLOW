@@ -1,6 +1,6 @@
 """
 Tests HTTP de members/router.py contra los criterios de aceptación de
-spec/features/004-gestion-usuarios/spec.md.
+HU-07 — Gestión de usuarios.
 """
 from decimal import Decimal
 
@@ -263,7 +263,7 @@ def test_historial_membresias(db):
     assert len(resp.json()) == 2
 
 
-# --- Restricción de qué rol puede crear/ascender cada actor (hallazgo posterior a 004) ---
+# --- Restricción de qué rol puede crear/ascender cada actor (hallazgo posterior a HU-07) ---
 
 
 def test_empleado_sin_permiso_no_puede_crear_administrador(db):
@@ -439,7 +439,7 @@ def test_administrador_no_necesita_gestionar_usuarios_explicito(db):
     assert resp.status_code == 201
 
 
-# --- 008: GET /usuarios/buscar ---
+# --- HU-03: GET /usuarios/buscar ---
 
 
 def _crear_miembro(db, token: str, cedula: str, nombre: str) -> None:

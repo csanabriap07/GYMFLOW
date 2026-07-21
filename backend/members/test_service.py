@@ -1,6 +1,6 @@
 """
 Tests de members/service.py contra los criterios de aceptación de
-spec/features/004-gestion-usuarios/spec.md (CRUD de usuarios y RN-07).
+HU-07 — Gestión de usuarios (CRUD de usuarios y RN-07).
 """
 from decimal import Decimal
 
@@ -123,7 +123,7 @@ def test_assign_membership_usuario_inexistente(db):
         assign_membership(9999, tipo.id, Decimal("50000"), None, db)
 
 
-# --- puede_asignar_rol: quién puede crear/ascender a qué rol (hallazgo posterior a 004) ---
+# --- puede_asignar_rol: quién puede crear/ascender a qué rol (hallazgo posterior a HU-07) ---
 
 
 def test_puede_asignar_rol_administrador_solo_administrador():
@@ -154,7 +154,7 @@ def test_puede_asignar_rol_miembro_invitado_sin_restriccion():
     assert puede_asignar_rol(RolUsuario.empleado, set(), RolUsuario.invitado) is True
 
 
-# --- 008: búsqueda por múltiples criterios (nombre / cédula, parcial) ---
+# --- HU-03: búsqueda por múltiples criterios (nombre / cédula, parcial) ---
 
 
 def _sembrar_para_busqueda(db) -> None:
@@ -179,7 +179,7 @@ def test_search_users_por_cedula_parcial(db):
 
 def test_search_users_por_nombre_parcial_varias_coincidencias(db):
     """Homónimos: se devuelve la lista para que el staff elija, nunca se
-    autoselecciona (riesgo señalado en plan.md)."""
+    autoselecciona."""
     _sembrar_para_busqueda(db)
     resultados = search_users("Laura", db)
     assert [u.nombre for u in resultados] == ["Laura Gómez", "Laura Restrepo"]

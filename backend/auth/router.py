@@ -34,7 +34,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 _ADMIN = Depends(require_role(RolUsuario.administrador))
 
-# Cookie httpOnly del refresh token del portal (011). path="/" y no
+# Cookie httpOnly del refresh token del portal del Miembro. path="/" y no
 # "/auth/portal" porque el navegador ve la API detrás del proxy con prefijo
 # /api (nginx/Vite lo recortan antes de llegar aquí) — un path del lado del
 # backend nunca coincidiría con la URL que ve el navegador.

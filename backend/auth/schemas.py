@@ -1,6 +1,6 @@
 """
 Schemas Pydantic de auth (entrada/salida de API). Toda validación de entrada
-vive aquí, nunca a mano en el router (AGENTS.md).
+vive aquí, nunca a mano en el router (convención del proyecto).
 """
 from pydantic import BaseModel, Field
 
@@ -20,14 +20,14 @@ class LoginResponse(BaseModel):
 
 
 class PortalLoginRequest(BaseModel):
-    """011: login del Miembro en el portal."""
+    """Portal del Miembro: login del Miembro (RF-02/RF-04)."""
 
     email: str
     password: str
 
 
 class PortalSessionResponse(BaseModel):
-    """011: respuesta de login/refresh del portal. El refresh token NO va
+    """Portal del Miembro: respuesta de login/refresh. El refresh token NO va
     aquí — viaja solo en la cookie httpOnly. `nombre` alimenta el saludo
     del Dashboard."""
 
@@ -37,9 +37,9 @@ class PortalSessionResponse(BaseModel):
 
 
 class PortalActivateRequest(BaseModel):
-    """011: activación de cuenta creada por el staff (dudas resueltas en
-    spec.md). Contraseña no vacía — mismo criterio que el alta de staff
-    (004 no fija un mínimo de longitud; no se inventa uno aquí)."""
+    """Portal del Miembro: activación de cuenta creada por el staff.
+    Contraseña no vacía — mismo criterio que el alta de staff
+    (HU-07 no fija un mínimo de longitud; no se inventa uno aquí)."""
 
     cedula: str
     email: str
@@ -47,7 +47,7 @@ class PortalActivateRequest(BaseModel):
 
 
 class PermisoGrantRequest(BaseModel):
-    """004-gestion-usuarios: otorgar un permiso individual a un usuario."""
+    """HU-07 — Gestión de usuarios: otorgar un permiso individual a un usuario."""
 
     codigo: str
 

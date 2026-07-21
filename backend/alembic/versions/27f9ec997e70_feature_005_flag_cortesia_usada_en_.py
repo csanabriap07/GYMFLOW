@@ -1,4 +1,4 @@
-"""feature 005: flag cortesia_usada en usuarios
+"""HU-04: flag cortesia_usada en usuarios
 
 Revision ID: 27f9ec997e70
 Revises: b4e1a7c0d9f2
@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade() -> None:
     # NOTA: autogenerate propuso DROP de los índices ix_checkins_fecha_hora
-    # (010) e ix_checkins_usuario_dia_activo (001) — ambos creados con SQL
+    # (HU-09) e ix_checkins_usuario_dia_activo (HU-01) — ambos creados con SQL
     # crudo, que Alembic no reconoce como metadata ORM. Se quitan a mano,
     # igual que en 002/003/004; esos índices siguen vigentes.
     op.add_column(

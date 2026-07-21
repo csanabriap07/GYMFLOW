@@ -1,6 +1,7 @@
 """
-Schemas Pydantic de members (entrada/salida de API, spec/features/004-gestion-usuarios).
-Toda validación de entrada vive aquí, nunca a mano en el router (AGENTS.md).
+Schemas Pydantic de members (entrada/salida de API, HU-07 — Gestión de
+usuarios). Toda validación de entrada vive aquí, nunca a mano en el router
+(convención del proyecto).
 """
 from datetime import date, datetime
 from decimal import Decimal
@@ -52,7 +53,7 @@ class UserOut(BaseModel):
 
 
 class MembershipActionRequest(BaseModel):
-    """Body compartido por asignar (primera vez) y renovar (004)."""
+    """Body compartido por asignar (primera vez) y renovar (HU-07)."""
 
     tipo_id: int
     monto: Decimal
@@ -69,7 +70,7 @@ class MembershipHistoryItem(BaseModel):
     visitas_restantes: int
     cupo_invitados_restantes: int
     # Calculado a partir de las fechas al momento de leer, no del campo
-    # `estado` guardado — ver hallazgo de doble-activa en plan.md de 004.
+    # `estado` guardado — evita el caso de doble membresía activa (HU-07).
     vigente: bool
 
     model_config = {"from_attributes": True}

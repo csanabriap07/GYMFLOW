@@ -1,6 +1,7 @@
 """
-Schemas Pydantic de reports (entrada/salida de API) — 010-reportes-asistencia.
-Toda validación de entrada vive aquí, nunca a mano en el router (AGENTS.md).
+Schemas Pydantic de reports (entrada/salida de API) — HU-09 — Reportes de
+asistencia. Toda validación de entrada vive aquí, nunca a mano en el router
+(convención del proyecto).
 """
 from datetime import date, datetime
 

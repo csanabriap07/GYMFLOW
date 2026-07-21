@@ -1,5 +1,5 @@
 """
-Conexión a PostgreSQL vía SQLAlchemy (core, según AGENTS.md).
+Conexión a PostgreSQL vía SQLAlchemy (módulo core).
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -16,7 +16,7 @@ class Base(DeclarativeBase):
 
 def get_db():
     """Dependencia FastAPI. Se propaga la misma Session entre services
-    cuando una feature necesita atomicidad entre módulos (RN-10, ver plan.md de 001)."""
+    cuando una feature necesita atomicidad entre módulos (RN-10)."""
     db = SessionLocal()
     try:
         yield db

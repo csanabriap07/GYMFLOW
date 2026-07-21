@@ -1,5 +1,4 @@
 # GymFlow — stack completo (db + backend + frontend)
-# Ver spec/constitution/ci-cd.md para las decisiones detrás de este archivo.
 #
 # Uso local:
 #   cp .env.example .env   # y ajustar valores

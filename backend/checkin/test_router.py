@@ -93,7 +93,7 @@ def test_cortesia_nombre_vacio_422(db):
     assert resp.status_code == 422
 
 
-# --- 006: POST /checkin/guest (check-in de invitado, titular presente) ---
+# --- HU-05: POST /checkin/guest (check-in de invitado, titular presente) ---
 
 
 def _crear_titular_con_cupo(db, cedula="1000000009", cupo=2):

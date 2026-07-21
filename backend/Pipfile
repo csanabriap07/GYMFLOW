@@ -20,6 +20,8 @@ openpyxl = "*"
 pytest = "*"
 httpx = "*"
 ruff = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
 
 [requires]
 python_version = "3.13"

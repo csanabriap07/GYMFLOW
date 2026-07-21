@@ -67,7 +67,7 @@ export async function postCheckin(cedula: string): Promise<CheckinResponse> {
   }
 }
 
-/** 005: el Staff registra la cortesía de primer día de un prospecto. No pasa
+/** HU-04: el Staff registra la cortesía de primer día de un prospecto. No pasa
  *  por el kiosko (no manda X-Device-Id) — es un endpoint de backoffice. */
 export async function registrarCortesia(
   cedula: string,
@@ -86,7 +86,7 @@ export interface GuestCheckinInput {
   nombreInvitado: string;
 }
 
-/** 006: el titular presente hace entrar a su invitado desde el kiosko. Mismo
+/** HU-05: el titular presente hace entrar a su invitado desde el kiosko. Mismo
  *  guard de dispositivo que el check-in normal (puede devolver 423). */
 export async function checkinGuest(input: GuestCheckinInput): Promise<CheckinResponse> {
   try {

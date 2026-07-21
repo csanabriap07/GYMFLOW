@@ -1,7 +1,7 @@
 """
-Tabla `tipos_membresia` — dueño: membership (ver tech-stack.md).
+Tabla `tipos_membresia` — dueño: el módulo membership (HU-08).
 Plantilla configurable de planes; no se elimina/desactiva con membresías activas
-vinculadas (RN-05); editarla no altera contratos vigentes (RN-06, ver 009).
+vinculadas (RN-05); editarla no altera contratos vigentes (RN-06, HU-08).
 """
 from decimal import Decimal
 

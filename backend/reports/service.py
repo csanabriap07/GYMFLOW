@@ -1,13 +1,13 @@
 """
-Servicio de reports — 010-reportes-asistencia.
+Servicio de reports — HU-09, Reportes de asistencia.
 
 `reports` no posee tablas propias (no tiene repository con queries): orquesta.
 Pide las asistencias a `checkin.service` (dueño de `checkins`) y las enriquece
 con `members.service` (nombres) y `membership.service` (tipo de plan), sin
-cruzar ninguna tabla ajena (regla de módulos, AGENTS.md). Solo lectura: nunca
+cruzar ninguna tabla ajena (regla de módulos del proyecto). Solo lectura: nunca
 escribe sobre la fuente inmutable `CheckIn` (RF-05).
 
-Regla de módulos (no negociable, AGENTS.md): este service es el ÚNICO punto de
+Regla de módulos del proyecto (no negociable): este service es el ÚNICO punto de
 entrada que otros módulos pueden llamar para leer/mutar datos de reports.
 """
 import csv
@@ -22,8 +22,16 @@ _COLUMNAS = ("Fecha y hora", "Usuario", "Resultado", "Tipo de membresía", "Titu
 
 
 def generate(filtros: ReportFilters, db) -> list[AttendanceRow]:
-    """Tabla consolidada de asistencias del rango (RF-12). Un rango sin
-    registros devuelve una lista vacía (no error)."""
+    """Tabla consolidada de asistencias del rango (RF-12).
+
+    Args:
+        filtros: Rango de fechas (``fecha_inicio``/``fecha_fin``) a reportar.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        Una fila por check-in exitoso en el rango; lista vacía si no hay
+        registros (no es un error).
+    """
     asistencias = checkin_service.get_attendance(filtros.fecha_inicio, filtros.fecha_fin, db)
     if not asistencias:
         return []
@@ -62,8 +70,16 @@ def _fila_valores(row: AttendanceRow) -> list[str]:
 
 
 def export(filtros: ReportFilters, formato: str, db) -> bytes:
-    """Exporta el MISMO dataset de `generate` a XLSX u CSV (RF-13). `formato`
-    ya viene validado por el router (`xlsx`|`csv`)."""
+    """Exporta el mismo dataset de :func:`generate` a XLSX o CSV (RF-13).
+
+    Args:
+        filtros: Rango de fechas a reportar.
+        formato: ``"xlsx"`` o ``"csv"``; ya viene validado por el router.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        El archivo generado como bytes.
+    """
     filas = generate(filtros, db)
     if formato == "csv":
         return _to_csv(filas)

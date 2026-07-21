@@ -3,13 +3,13 @@ Siembra los datos mínimos de DESARROLLO para que el stack sirva recién
 levantado (`docker compose up`), sin pasos manuales:
 
 - Staff de prueba (empleado + administrador) con sus permisos individuales.
-- Un tipo de membresía ("Mensual") para poder asignar/renovar (004) — el CRUD
-  de tipos es 009 y aún no existe, sin esto el backoffice no puede asignar nada.
+- Un tipo de membresía ("Mensual") para poder asignar/renovar (HU-07) — sin
+  esto el backoffice no puede asignar nada mientras no exista el CRUD de tipos (HU-08).
 - Una socia de demostración con membresía activa (probar kiosko/portal de una)
-  y SIN contraseña: sirve también para demostrar la activación de cuenta (011).
+  y SIN contraseña: sirve también para demostrar la activación de cuenta del portal.
 
 El catálogo de PERMISOS no se siembra aquí: eso es código de developer y viaja
-en las migraciones Alembic (003/004) — el admin solo otorga/quita códigos
+en las migraciones Alembic (HU-10/HU-07) — el admin solo otorga/quita códigos
 existentes, nunca los crea.
 
 Idempotente: lo que ya existe se deja como está. Solo para desarrollo local /
@@ -132,7 +132,7 @@ def _seed_socia_demo(db: Session, tipo: MembershipType) -> None:
             email=SOCIA_DEMO["email"],
             rol=RolUsuario.miembro,
             estado=EstadoUsuario.activo,
-            password_hash=None,  # sin activar: permite demostrar /portal/activar (011)
+            password_hash=None,  # sin activar: permite demostrar /portal/activar
         )
         db.add(socia)
         db.commit()

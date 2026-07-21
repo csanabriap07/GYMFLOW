@@ -1,7 +1,7 @@
 """
 Tests HTTP de POST /auth/login y del guard de permisos aplicado a
 checkin/router.py, contra los criterios de aceptación de
-spec/features/003-autenticacion-segura/spec.md.
+HU-10 — Autenticación segura.
 """
 from fastapi.testclient import TestClient
 

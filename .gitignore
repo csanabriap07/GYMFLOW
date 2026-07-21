@@ -28,3 +28,6 @@ dist/
 
 # Alembic (se versionan las migraciones, no artefactos temporales)
 *.sqlite3
+
+# Sphinx (se versiona docs/source, el HTML se regenera con sphinx-build)
+backend/docs/build/

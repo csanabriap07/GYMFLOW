@@ -1,11 +1,9 @@
 # GymFlow
 
 Sistema de control de acceso físico y gestión de membresías para gimnasios
-pequeños y medianos. Ver `AGENTS.md` para la descripción completa, stack y
-convenciones — este README es solo un quickstart.
-
-**Antes de tocar código, lee `AGENTS.md` y `spec/`.** Es un proyecto SDD
-(Spec-Driven Development): la fuente de verdad del diseño es `spec/`.
+pequeños y medianos. Este README es solo un quickstart; el diseño completo
+(Historias de Usuario, Requerimientos Funcionales y No Funcionales, Reglas
+de Negocio) vive en `docs/Análisis.pdf`.
 
 ## Estructura
 
@@ -46,7 +44,7 @@ El backend aplica las migraciones y **siembra solo los datos de desarrollo**
 `ENVIRONMENT=production`): staff de prueba, un tipo de membresía "Mensual" y
 una socia demo. No hay pasos manuales: se levanta el stack y se puedes probar.
 
-⚠️ **Si el volumen de datos es anterior a `feat(004)`** (cambio de hashing
+⚠️ **Si el volumen de datos es anterior al cambio de HU-07** (cambio de hashing
 passlib/bcrypt → pwdlib/Argon2): el login devuelve 401 aunque la contraseña
 sea correcta, porque los hashes viejos ya no se pueden verificar. Resetear:
 
@@ -58,11 +56,11 @@ docker compose up --build   # migra y re-siembra solo
 ## Rutas del frontend
 
 - `/` — kiosko táctil de check-in (sin login, dispositivo físico).
-- `/staff/login` — login del backoffice (Empleado/Administrador, `003-autenticacion-segura`).
-- `/staff/home` — panel del backoffice (sidebar): usuarios y membresías (`004`), permisos, dispositivos bloqueados (RN-03).
-- `/portal/login` — portal del socio (`011`): login del Miembro con correo/contraseña.
+- `/staff/login` — login del backoffice (Empleado/Administrador, HU-10 — Autenticación segura).
+- `/staff/home` — panel del backoffice (sidebar): usuarios y membresías (HU-07 — Gestión de usuarios), permisos, dispositivos bloqueados (RN-03).
+- `/portal/login` — portal del socio: login del Miembro con correo/contraseña.
 - `/portal/activar` — activación de cuenta del Miembro (la cuenta la crea el staff; el socio define su contraseña la primera vez).
-- `/portal` — dashboard del socio: resumen de membresía (`007`) con aviso de vencimiento (≤10 días).
+- `/portal` — dashboard del socio: resumen de membresía (HU-06) con aviso de vencimiento (≤10 días).
 
 ## Cuentas de desarrollo (sembradas automáticamente)
 

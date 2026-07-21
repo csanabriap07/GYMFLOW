@@ -1,4 +1,4 @@
-"""feature 010: índice en checkins.fecha_hora
+"""HU-09: índice en checkins.fecha_hora
 
 Revision ID: b4e1a7c0d9f2
 Revises: c98ffd6f38d1
@@ -15,7 +15,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # 010 (RF-12): el reporte de asistencias filtra por rango de fecha_hora.
+    # HU-09 (RF-12): el reporte de asistencias filtra por rango de fecha_hora.
     # Índice para que el filtro por rango no haga seq scan cuando el histórico
     # de check-ins crezca.
     op.create_index(

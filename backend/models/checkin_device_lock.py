@@ -1,5 +1,5 @@
 """
-Tabla `checkin_device_locks` — dueño: checkin (spec/features/002-acceso-denegado,
+Tabla `checkin_device_locks` — dueño: el módulo checkin (HU-02 — Acceso denegado,
 RN-03). Contador de intentos fallidos por dispositivo en tabla (no en memoria),
 para ser correcto con múltiples workers de uvicorn en Docker.
 """

@@ -1,6 +1,6 @@
 """
-Tabla `invitados` — dueño pendiente de confirmar (duda abierta en
-006-checkin-invitado). Se propone `members`, a confirmar con el equipo.
+Tabla `invitados` — dueño pendiente de confirmar (duda abierta de HU-05 —
+Check-in de invitado). Se propone `members`, a confirmar con el equipo.
 """
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column

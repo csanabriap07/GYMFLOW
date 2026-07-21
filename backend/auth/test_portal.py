@@ -1,7 +1,7 @@
 """
-Tests HTTP de la sesión del Miembro en el portal (011): login, refresh con
+Tests HTTP de la sesión del Miembro en el portal: login, refresh con
 rotación, activación de cuenta y logout — contra los criterios de aceptación
-de spec/features/011-portal-miembro-autenticacion/spec.md.
+del Portal del Miembro (RF-02/RF-04).
 """
 from datetime import timedelta
 

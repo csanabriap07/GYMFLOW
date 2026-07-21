@@ -100,7 +100,7 @@ export async function listUsers(): Promise<User[]> {
   return data;
 }
 
-/** 008: coincidencia parcial sobre nombre O cédula, tope de 50 resultados
+/** HU-03: coincidencia parcial sobre nombre O cédula, tope de 50 resultados
  *  (el backend es quien lo impone). Una query vacía devuelve lista vacía. */
 export async function searchUsers(q: string): Promise<User[]> {
   const { data } = await apiClient.get<User[]>('/usuarios/buscar', { params: { q } });

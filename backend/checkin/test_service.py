@@ -1,7 +1,7 @@
 """
 Tests de checkin/service.py contra los criterios de aceptación de
-spec/features/001-checkin-membresia-activa/spec.md y
-spec/features/002-acceso-denegado/spec.md.
+HU-01 — Check-in del miembro con membresía activa y
+HU-02 — Acceso denegado.
 """
 import threading
 from datetime import datetime, timedelta, timezone
@@ -169,7 +169,7 @@ def test_membresia_vencida_deniega_con_razon_y_persiste_checkin(db):
 
 
 def test_denegacion_por_membresia_no_cuenta_para_bloqueo_de_dispositivo(db):
-    """spec.md de 002: MEMBRESIA_VENCIDA/SIN_VISITAS no cuentan para RN-03,
+    """HU-02: MEMBRESIA_VENCIDA/SIN_VISITAS no cuentan para RN-03,
     a diferencia de CEDULA_NO_ENCONTRADA."""
     user, _ = _crear_socio(db, visitas_restantes=0)
 
@@ -300,7 +300,7 @@ def test_diez_checkins_concurrentes_no_descuentan_de_mas(db):
     assert activos == 1
 
 
-# --- 005: cortesía de primer día (flujo de Staff) ---
+# --- HU-04: cortesía de primer día (flujo de Staff) ---
 
 
 def test_cortesia_crea_prospecto_y_checkin_exitoso(db):
@@ -371,7 +371,7 @@ def test_cortesia_no_descuenta_ni_crea_membresia(db):
     assert db.query(Membership).filter(Membership.miembro_id == prospecto.id).count() == 0
 
 
-# --- 006: check-in de invitado (titular presente, sin ventana) ---
+# --- HU-05: check-in de invitado (titular presente, sin ventana) ---
 
 
 def _set_cupo(db, membership, cupo):
@@ -482,7 +482,7 @@ def test_checkin_guest_titular_sin_visitas_pero_con_cupo_ok(db):
 
 def test_checkin_guest_reingreso_mismo_dia_no_descuenta_doble(db):
     """El mismo invitado dos veces el mismo día → segundo es éxito idempotente
-    sin volver a descontar cupo (análogo al Filtro 1 de 001)."""
+    sin volver a descontar cupo (análogo al Filtro 1 de HU-01)."""
     titular, membership = _crear_socio(db)
     _set_cupo(db, membership, 2)
 

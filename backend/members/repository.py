@@ -1,6 +1,6 @@
 """
-Repository de members — único punto de acceso a la tabla `usuarios` (AGENTS.md).
-Métodos concretos se agregan al implementar spec/features/001, 004, 005, 006.
+Repository de members — único punto de acceso a la tabla `usuarios`
+(convención del proyecto). Cubre HU-01, HU-03, HU-04 y HU-07.
 """
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -30,9 +30,8 @@ class MembersRepository:
         return self.db.query(User).order_by(User.id).all()
 
     def search_by_name_or_doc(self, q: str, limit: int) -> list[User]:
-        """008: coincidencia parcial sobre nombre O cédula, en un solo campo
-        (decisión del equipo sobre la contradicción entre los criterios 1 y 5
-        de la spec). Los usuarios anonimizados por RN-07 quedan fuera solos:
+        """Coincidencia parcial sobre nombre O cédula, en un solo campo
+        (HU-03). Los usuarios anonimizados por RN-07 quedan fuera solos:
         con `nombre` y `cedula` en NULL, ILIKE nunca hace match."""
         patron = f"%{q.translate(_COMODINES_LIKE)}%"
         return (

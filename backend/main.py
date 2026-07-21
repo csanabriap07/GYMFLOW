@@ -1,5 +1,5 @@
 """
-Único punto de integración entre módulos (AGENTS.md): registra todos los
+Único punto de integración entre módulos (arquitectura del proyecto): registra todos los
 routers. No debe contener lógica de negocio.
 """
 from fastapi import FastAPI

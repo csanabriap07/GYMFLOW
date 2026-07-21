@@ -1,7 +1,7 @@
 """
-Router de checkin (spec/features/001-checkin-membresia-activa,
-002-acceso-denegado). Validación de entrada con Pydantic
-(checkin/schemas.py), nunca a mano aquí (AGENTS.md).
+Router de checkin (HU-01 — Check-in con membresía activa y HU-02 — Acceso
+denegado). Validación de entrada con Pydantic (checkin/schemas.py), nunca a
+mano aquí (convención del proyecto).
 """
 from typing import Literal
 
@@ -36,8 +36,8 @@ def enforce_device_not_locked(
     db: Session = Depends(get_db),
     x_device_id: str | None = Header(default=None),
 ) -> str:
-    """RN-03 (002-acceso-denegado): id estable que manda el kiosko, con
-    fallback a IP si falta el header (duda abierta de spec.md, resuelta así)."""
+    """RN-03 (HU-02 — Acceso denegado): id estable que manda el kiosko, con
+    fallback a IP si falta el header (decisión del equipo)."""
     device_id = x_device_id or (request.client.host if request.client else "desconocido")
     lock_repo = CheckinDeviceLockRepository(db)
     momento = _now()
@@ -80,7 +80,7 @@ def post_checkin_guest(
     db: Session = Depends(get_db),
     device_id: str = Depends(enforce_device_not_locked),
 ) -> CheckinResponse:
-    """006: el titular presente hace entrar a su invitado desde el kiosko.
+    """HU-05: el titular presente hace entrar a su invitado desde el kiosko.
     Mismo guard de dispositivo que el check-in normal (RN-03). El descuento de
     cupo y el registro del CheckIn son atómicos (RN-10)."""
     resultado, mensaje, nombre, visitas_restantes, razon = checkin_guest(
@@ -101,7 +101,7 @@ def post_cortesia(
     db: Session = Depends(get_db),
     _permiso: dict = Depends(require_permission("members.gestionar_usuarios")),
 ) -> CheckinResponse:
-    """005: el Staff registra la cortesía de primer día de un prospecto. Gateado
+    """HU-04: el Staff registra la cortesía de primer día de un prospecto. Gateado
     con `members.gestionar_usuarios` (crea un User, mismo permiso que el CRUD de
     004). No usa el guard de dispositivo del kiosko: es un flujo de backoffice."""
     resultado, mensaje, nombre, visitas_restantes, razon = first_day_courtesy(

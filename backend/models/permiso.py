@@ -1,5 +1,5 @@
 """
-Tablas `permisos` y `usuario_permisos` — dueño: auth (spec/features/003-autenticacion-segura).
+Tablas `permisos` y `usuario_permisos` — dueño: el módulo auth (HU-10, RF-09).
 Permisos individuales por usuario, independientes del rol. `administrador`
 tiene implícitamente todos los permisos (ver auth/dependencies.py), no
 necesita filas en `usuario_permisos`.

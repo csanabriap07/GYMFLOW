@@ -1,4 +1,4 @@
-"""feature 011: tabla refresh_tokens
+"""Portal del Miembro: tabla refresh_tokens
 
 Revision ID: c98ffd6f38d1
 Revises: f3c77f7db862
@@ -32,7 +32,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_refresh_tokens_token_hash'), 'refresh_tokens', ['token_hash'], unique=True)
     op.create_index(op.f('ix_refresh_tokens_usuario_id'), 'refresh_tokens', ['usuario_id'], unique=False)
     # NOTA: autogenerate volvió a detectar como "removido" el índice único
-    # parcial ix_checkins_usuario_dia_activo de 001 (creado con SQL crudo,
+    # parcial ix_checkins_usuario_dia_activo de HU-01 (creado con SQL crudo,
     # Alembic no lo ve como metadata ORM) — el DROP INDEX se quita a mano,
     # igual que en e8bdfb173fb7/e57695beaef9; ese índice sigue vigente.
     # ### end Alembic commands ###

@@ -1,5 +1,5 @@
 """
-Tabla `usuarios` — dueño: members (ver tech-stack.md).
+Tabla `usuarios` — dueño: el módulo members.
 """
 import enum
 from datetime import datetime
@@ -27,7 +27,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     # nullable=True: RN-07 anonimiza (borra PII) preservando la fila para el
-    # histórico de CheckIn (FK usuario_id). Ver duda abierta en 004-gestion-usuarios.
+    # histórico de CheckIn (FK usuario_id). Duda abierta de HU-07.
     cedula: Mapped[str | None] = mapped_column(String(20), unique=True, index=True)
     nombre: Mapped[str | None] = mapped_column(String(150))
     email: Mapped[str | None] = mapped_column(String(150), unique=True)
@@ -38,9 +38,10 @@ class User(Base):
     creado_en: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    # 005: marca que esta cédula ya usó su cortesía de primer día (RF-07). Un
-    # "Prospecto" es un User con rol=invitado y este flag en True (decisión del
-    # equipo sobre la duda abierta del spec: flag, no un valor de enum nuevo).
-    # Impide una segunda cortesía; se conserva al afiliarse (004) para no
-    # concederla de nuevo aunque el rol pase a miembro.
+
+    # Marca que esta cédula ya usó su cortesía de primer día (HU-04, RF-07).
+    # Un "Prospecto" es un User con rol=invitado y este flag en True (flag,
+    # no un valor de enum nuevo). Impide una segunda cortesía; se conserva
+    # al afiliarse (HU-07) para no concederla de nuevo aunque el rol pase a
+    # miembro.
     cortesia_usada: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")

@@ -19,7 +19,7 @@ function CortesiaPage() {
     onSuccess: (data) => {
       setResultado(data);
       if (data.resultado === 'exitoso') {
-        // El prospecto es un User nuevo: refresca la lista de usuarios (008).
+        // El prospecto es un User nuevo: refresca la lista de usuarios (HU-03).
         queryClient.invalidateQueries({ queryKey: ['usuarios'] });
         setCedula('');
         setNombre('');

@@ -27,7 +27,7 @@ function UsersPage() {
   });
   const [seleccionadoId, setSeleccionadoId] = useState<number | null>(null);
 
-  // 008: búsqueda por nombre o cédula (coincidencia parcial, un solo campo).
+  // HU-03: búsqueda por nombre o cédula (coincidencia parcial, un solo campo).
   const [busqueda, setBusqueda] = useState('');
   const [termino, setTermino] = useState('');
 

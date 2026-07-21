@@ -1,11 +1,11 @@
 """
 Servicio de checkin — orquesta el motor de validación de RN-01/RN-02/RN-03/
-RN-08/RN-10 (spec/features/001-checkin-membresia-activa,
-002-acceso-denegado). Resuelve al usuario vía members.service y valida/
+RN-08/RN-10 (HU-01 — Check-in con membresía activa y HU-02 — Acceso
+denegado, RF-06). Resuelve al usuario vía members.service y valida/
 descuenta la membresía vía membership.service; nunca consulta sus tablas
-directamente (regla de módulos, AGENTS.md).
+directamente (regla de módulos del proyecto).
 
-Regla de módulos (no negociable, AGENTS.md): este service es el ÚNICO punto de
+Regla de módulos del proyecto (no negociable): este service es el ÚNICO punto de
 entrada que otros módulos pueden llamar para leer/mutar datos de checkin.
 Ningún otro módulo debe importar checkin/repository.py directamente.
 """
@@ -24,22 +24,39 @@ from core.config import now as _now, settings
 from membership.schemas import MembershipSummary
 from models import CheckIn, ResultadoCheckin
 
-# spec.md de 002 (decisión provisional, no confirmada con equipo/profesora):
+# HU-02 (decisión provisional, no confirmada con equipo/profesora):
 # solo dígitos, 5 a 15 caracteres — permisivo con cédulas de varios países.
 _CEDULA_VALIDA = re.compile(r"^\d{5,15}$")
 
 
 class UsuarioNoEncontradoError(Exception):
     """Cédula con formato válido pero sin usuario registrado. La cortesía de
-    primer día (005) es un flujo de Staff, no del kiosko, así que por ahora
-    esto se trata como error 404 en el router — no es una decisión de
-    negocio, es un límite explícito de alcance de 001/002 (ver "Fuera de
-    alcance" en sus spec.md). No cuenta para el bloqueo de dispositivo (RN-03):
-    solo CEDULA_NO_ENCONTRADA (formato inválido) cuenta."""
+    primer día (HU-04) es un flujo de Staff, no del kiosko, así que por ahora
+    esto se trata como error 404 en el router — límite explícito del alcance
+    de HU-01/HU-02. No cuenta para el bloqueo de dispositivo (RN-03): solo
+    CEDULA_NO_ENCONTRADA (formato inválido) cuenta."""
 
 
-def checkin_member(cedula: str, device_id: str, db: Session):
-    """Devuelve (CheckinResultado, mensaje, nombre, visitas_restantes, razon)."""
+def checkin_member(
+    cedula: str, device_id: str, db: Session
+) -> tuple[CheckinResultado, str, str | None, int | None, RazonDenegacion | None]:
+    """Motor de validación de check-in: aplica RN-01/RN-02/RN-03/RN-08/RN-10
+    en orden y registra el resultado.
+
+    Args:
+        cedula: Cédula capturada en el kiosko.
+        device_id: Identificador del dispositivo, para el bloqueo por
+            intentos fallidos (RN-03).
+        db: Sesión de base de datos activa.
+
+    Returns:
+        Tupla ``(resultado, mensaje, nombre, visitas_restantes, razon)``.
+        ``razon`` es ``None`` cuando el resultado es exitoso.
+
+    Raises:
+        UsuarioNoEncontradoError: si la cédula tiene formato válido pero no
+            corresponde a ningún usuario registrado.
+    """
     lock_repo = CheckinDeviceLockRepository(db)
 
     if not _CEDULA_VALIDA.match(cedula):
@@ -57,7 +74,7 @@ def checkin_member(cedula: str, device_id: str, db: Session):
     hoy = membership_service.hoy()
 
     # Filtro 1: ya tiene un CheckIn is_active=true de hoy → éxito directo,
-    # sin reevaluar RN-01 ni descontar visita (spec.md de 001, "Filtro 1").
+    # sin reevaluar RN-01 ni descontar visita (HU-01, "Filtro 1", RN-02).
     if repo.exists_successful_checkin_today(user.id, hoy):
         lock_repo.reset_attempts(device_id)
         db.commit()
@@ -70,7 +87,7 @@ def checkin_member(cedula: str, device_id: str, db: Session):
         razon, mensaje = _razon_rn01(user.id, db)
         # RN-10: la denegación no toca saldos, pero sí queda registrada.
         # No cuenta para el bloqueo (RN-03): son socios reales y conocidos,
-        # no tanteo de cédulas (spec.md de 002).
+        # no tanteo de cédulas (HU-02).
         repo.insert(
             CheckIn(
                 usuario_id=user.id,
@@ -112,19 +129,30 @@ def checkin_member(cedula: str, device_id: str, db: Session):
     return _respuesta_exitosa(user.nombre, resumen)
 
 
-def first_day_courtesy(cedula: str, nombre: str, db: Session):
-    """005: registra la cortesía de primer día de un prospecto. Es un flujo de
-    Staff desde el backoffice (NO self-service en kiosko — decisión del equipo,
-    ver spec.md de 005), por eso no toca el contador de bloqueo de dispositivo
-    (RN-03). Devuelve la misma tupla que `checkin_member`:
-    (CheckinResultado, mensaje, nombre, visitas_restantes, razon)."""
+def first_day_courtesy(
+    cedula: str, nombre: str, db: Session
+) -> tuple[CheckinResultado, str, str | None, int | None, RazonDenegacion | None]:
+    """Registra la cortesía de primer día de un prospecto (HU-04).
+
+    Es un flujo de Staff desde el backoffice (no self-service en kiosko),
+    por eso no toca el contador de bloqueo de dispositivo (RN-03).
+
+    Args:
+        cedula: Cédula del prospecto.
+        nombre: Nombre capturado por el Staff.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        La misma tupla que :func:`checkin_member`
+        ``(resultado, mensaje, nombre, visitas_restantes, razon)``.
+    """
     user = members_service.get_user_by_cedula(cedula, db)
     repo = CheckinRepository(db)
 
     if user is not None:
         if user.cortesia_usada:
-            # Segunda cortesía: denegada y registrada (rastro auditable, mismo
-            # criterio que 002 para las denegaciones).
+            # Segunda cortesía: denegada y registrada (rastro auditable,
+            # mismo criterio que HU-02 para las denegaciones).
             razon = RazonDenegacion.cortesia_ya_utilizada
             repo.insert(
                 CheckIn(
@@ -179,13 +207,25 @@ def first_day_courtesy(cedula: str, nombre: str, db: Session):
     return _respuesta_cortesia(prospecto.nombre)
 
 
-def checkin_guest(cedula_titular: str, cedula_invitado: str, nombre_invitado: str, db: Session):
-    """006: el titular (presente en el kiosko) hace entrar a su invitado.
-    Valida que el titular tenga membresía activa y cupo de invitados, descuenta
-    exactamente 1 cupo (RN-09) y registra el CheckIn del invitado, todo en una
-    transacción única (RN-10). SIN ventana temporal: la presencia del titular es
-    siempre requerida (decisión del equipo — solo "Camino 2" del spec de 006).
-    Devuelve la misma tupla que `checkin_member`."""
+def checkin_guest(
+    cedula_titular: str, cedula_invitado: str, nombre_invitado: str, db: Session
+) -> tuple[CheckinResultado, str, str | None, int | None, RazonDenegacion | None]:
+    """El titular (presente en el kiosko) hace entrar a su invitado (HU-05).
+
+    Valida que el titular tenga membresía activa y cupo de invitados,
+    descuenta exactamente 1 cupo (RN-09) y registra el CheckIn del
+    invitado, todo en una transacción única (RN-10). Sin ventana temporal:
+    la presencia del titular es siempre requerida.
+
+    Args:
+        cedula_titular: Cédula del socio titular, presente en el kiosko.
+        cedula_invitado: Cédula del invitado.
+        nombre_invitado: Nombre del invitado.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        La misma tupla que :func:`checkin_member`.
+    """
     titular = members_service.get_user_by_cedula(cedula_titular, db)
     if titular is None:
         return _respuesta_denegada(
@@ -214,8 +254,8 @@ def checkin_guest(cedula_titular: str, cedula_invitado: str, nombre_invitado: st
     repo = CheckinRepository(db)
     hoy = membership_service.hoy()
 
-    # Filtro 1 (análogo a 001): si el invitado ya ingresó hoy, no se descuenta
-    # otro cupo — reingreso idempotente del día.
+    # Filtro 1 (análogo a HU-01): si el invitado ya ingresó hoy, no se
+    # descuenta otro cupo — reingreso idempotente del día.
     if repo.exists_successful_checkin_today(invitado.id, hoy):
         db.commit()
         return _respuesta_invitado_ya_ingreso(
@@ -252,19 +292,38 @@ def checkin_guest(cedula_titular: str, cedula_invitado: str, nombre_invitado: st
 
 
 def get_attendance(fecha_inicio: date, fecha_fin: date, db: Session) -> list[CheckIn]:
-    """010 (RF-12): asistencias (CheckIn `is_active=true`) en el rango dado,
-    ambos extremos inclusive. Punto de entrada del módulo dueño de `checkins`
-    para que `reports` construya el reporte sin cruzar esta tabla directamente
-    (regla de módulos, AGENTS.md). Solo lectura: no toca la fuente inmutable
-    (RF-05)."""
+    """Asistencias (``CheckIn`` con ``is_active=true``) en el rango dado,
+    ambos extremos inclusive (HU-09, RF-12).
+
+    Punto de entrada del módulo dueño de ``checkins`` para que ``reports``
+    construya el reporte sin cruzar esta tabla directamente. Solo lectura:
+    no toca la fuente inmutable (RF-05).
+
+    Args:
+        fecha_inicio: Primer día del rango, inclusive.
+        fecha_fin: Último día del rango, inclusive.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        Los check-ins exitosos en el rango, ordenados por fecha.
+    """
     return CheckinRepository(db).list_attendances_in_range(fecha_inicio, fecha_fin)
 
 
 def get_member_attendance_consistency(
     user_id: int, db: Session, period: str = "semana"
 ) -> AttendanceConsistencyOut:
-    """Devuelve una serie simple de asistencia para la vista del portal del
-    socio, ya sea por semana o por mes."""
+    """Serie de asistencia del socio para el dashboard del portal.
+
+    Args:
+        user_id: ID del socio.
+        db: Sesión de base de datos activa.
+        period: ``"semana"`` (7 días) o ``"mes"`` (30 días); cualquier otro
+            valor cae a ``"semana"``.
+
+    Returns:
+        Un punto por día del período, con el conteo de asistencias de ese día.
+    """
     periodo = period.lower()
     if periodo not in {"semana", "mes"}:
         periodo = "semana"
@@ -304,7 +363,7 @@ def get_member_attendance_consistency(
 
 def _razon_rn01(user_id: int, db: Session) -> tuple[RazonDenegacion, str]:
     """Distingue MEMBRESIA_VENCIDA de SIN_VISITAS cuando RN-01 no se cumple
-    (spec.md de 002). Sin fila `activa` en absoluto se trata como vencida —
+    (HU-02). Sin fila `activa` en absoluto se trata como vencida —
     no hay membresía vigente que mostrar."""
     membresia = membership_service.get_membership_for_user(user_id, db)
     if membresia is None or membresia.fecha_vencimiento < membership_service.hoy():
@@ -339,8 +398,8 @@ def _local_date(fecha_hora: 'datetime') -> date:
 
 
 def _respuesta_cortesia(nombre: str | None):
-    """005: éxito de cortesía. Sin visitas_restantes — un prospecto no tiene
-    membresía, por eso el campo va en None (no es 0)."""
+    """Éxito de cortesía (HU-04). Sin visitas_restantes — un prospecto no
+    tiene membresía, por eso el campo va en None (no es 0)."""
     return (
         CheckinResultado.exitoso,
         f"CORTESÍA CONCEDIDA. Bienvenido/a {nombre}. Primer día gratis "
@@ -352,9 +411,9 @@ def _respuesta_cortesia(nombre: str | None):
 
 
 def _respuesta_invitado_exitoso(nombre_invitado: str | None, nombre_titular: str | None, cupo: int):
-    """006: éxito de invitado. `visitas_restantes` va en None (el invitado no
-    tiene visitas propias); el cupo restante del titular va en el mensaje, con
-    el formato objetivo de la Propuesta."""
+    """Éxito de invitado (HU-05). `visitas_restantes` va en None (el
+    invitado no tiene visitas propias); el cupo restante del titular va en
+    el mensaje."""
     return (
         CheckinResultado.exitoso,
         f"ACCESO PERMITIDO. Bienvenido/a {nombre_invitado}. El socio "

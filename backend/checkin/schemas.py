@@ -1,7 +1,7 @@
 """
-Schemas Pydantic de checkin (entrada/salida de API). Se agregan al implementar
-spec/features/001, 002, 005, 006/. Toda validación de entrada vive aquí, nunca a
-mano en el router (AGENTS.md).
+Schemas Pydantic de checkin (entrada/salida de API) — HU-01, HU-02, HU-04 y
+HU-05. Toda validación de entrada vive aquí, nunca a mano en el router
+(convención del proyecto).
 """
 import enum
 from datetime import date, datetime
@@ -9,7 +9,7 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, field_validator, model_validator
 
-# Mismo criterio de cédula que checkin.service (002): solo dígitos, 5 a 15.
+# Mismo criterio de cédula que checkin.service (HU-02): solo dígitos, 5 a 15.
 _CEDULA_MIN = 5
 _CEDULA_MAX = 15
 
@@ -20,23 +20,23 @@ class CheckinResultado(str, enum.Enum):
 
 
 class RazonDenegacion(str, enum.Enum):
-    """spec.md de 002 — sin `YA_INGRESO_HOY`: un reingreso el mismo día es
-    Exitoso (ver 001), no una razón de denegación."""
+    """HU-02 — sin `YA_INGRESO_HOY`: un reingreso el mismo día es
+    Exitoso (HU-01, RN-02), no una razón de denegación."""
 
     membresia_vencida = "MEMBRESIA_VENCIDA"
     sin_visitas = "SIN_VISITAS"
     cedula_no_encontrada = "CEDULA_NO_ENCONTRADA"
     dispositivo_bloqueado = "DISPOSITIVO_BLOQUEADO"
-    # 005: la cédula ya usó su cortesía de primer día — no se concede otra.
+    # HU-04: la cédula ya usó su cortesía de primer día — no se concede otra.
     cortesia_ya_utilizada = "CORTESIA_YA_UTILIZADA"
-    # 005: se intentó dar cortesía a una cédula ya registrada (socio/staff);
+    # HU-04: se intentó dar cortesía a una cédula ya registrada (socio/staff);
     # esa persona no es un prospecto nuevo, debe hacer check-in normal.
     ya_registrado = "YA_REGISTRADO"
-    # 006: el titular indicado no existe en el sistema.
+    # HU-05: el titular indicado no existe en el sistema.
     titular_no_encontrado = "TITULAR_NO_ENCONTRADO"
-    # 006: el titular no tiene una membresía activa/vigente que avale invitados.
+    # HU-05: el titular no tiene una membresía activa/vigente que avale invitados.
     titular_sin_membresia = "TITULAR_SIN_MEMBRESIA"
-    # 006: el titular ya agotó su cupo de invitados de este ciclo (RN-04).
+    # HU-05: el titular ya agotó su cupo de invitados de este ciclo (RN-04).
     sin_cupo_invitados = "SIN_CUPO_INVITADOS"
 
 
@@ -45,8 +45,8 @@ class CheckinRequest(BaseModel):
 
 
 class CortesiaRequest(BaseModel):
-    """005: registro de cortesía por el Staff (no self-service en kiosko). El
-    Staff verifica la identidad en persona, por eso el nombre es obligatorio."""
+    """HU-04: registro de cortesía por el Staff (no self-service en kiosko).
+    El Staff verifica la identidad en persona, por eso el nombre es obligatorio."""
 
     cedula: str
     nombre: str
@@ -69,9 +69,9 @@ class CortesiaRequest(BaseModel):
 
 
 class GuestCheckinRequest(BaseModel):
-    """006: el titular (presente en el kiosko) hace entrar a su invitado. Se
-    piden ambas cédulas + el nombre del invitado (para el mensaje de bienvenida
-    y para registrar su identidad)."""
+    """HU-05: el titular (presente en el kiosko) hace entrar a su invitado.
+    Se piden ambas cédulas + el nombre del invitado (para el mensaje de
+    bienvenida y para registrar su identidad)."""
 
     cedula_titular: str
     cedula_invitado: str

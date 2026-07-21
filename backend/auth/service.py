@@ -1,7 +1,7 @@
 """
 Servicio de auth.
 
-Regla de módulos (no negociable, AGENTS.md): este service es el ÚNICO punto de
+Regla de módulos del proyecto (no negociable): este service es el ÚNICO punto de
 entrada que otros módulos pueden llamar para leer/mutar datos de auth.
 Ningún otro módulo debe importar auth/repository.py directamente.
 
@@ -24,26 +24,39 @@ _ROLES_BACKOFFICE = (RolUsuario.empleado, RolUsuario.administrador)
 
 
 class CredencialesInvalidasError(Exception):
-    """Cubre: email inexistente, password incorrecta, rol no es Empleado/
-    Administrador, o estado inactivo. Nunca se distingue el motivo en la
-    respuesta (spec.md: 'sin revelar si el usuario existe')."""
+    """Email inexistente, password incorrecta, rol no es Empleado/Administrador,
+    o estado inactivo. Nunca se distingue el motivo (HU-10: "sin revelar si el
+    usuario existe")."""
 
 
 class PermisoInexistenteError(Exception):
-    """El código de permiso pedido no está en el catálogo (004)."""
+    """El código de permiso pedido no está en el catálogo de permisos."""
 
 
 class SesionInvalidaError(Exception):
-    """011: refresh token inexistente, expirado, revocado, o cuyo usuario ya
-    no es un Miembro activo. Nunca se distingue el motivo en la respuesta."""
+    """Refresh token inexistente, expirado, revocado, o cuyo usuario ya no es
+    un Miembro activo. Nunca se distingue el motivo en la respuesta."""
 
 
 class ActivacionInvalidaError(Exception):
-    """011: cédula+correo no corresponden a un Miembro activo sin contraseña.
-    Cubre también 'ya tiene contraseña' — no se revela qué condición falló."""
+    """Cédula+correo no corresponden a un Miembro activo sin contraseña.
+    Cubre también "ya tiene contraseña" — no se revela qué condición falló."""
 
 
 def login(email: str, password: str, db: Session) -> tuple[str, RolUsuario, set[str]]:
+    """Autentica a un usuario de backoffice (Empleado o Administrador).
+
+    Args:
+        email: Correo del usuario.
+        password: Contraseña en texto plano a verificar contra el hash.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        Tupla ``(access_token, rol, permisos)`` del usuario autenticado.
+
+    Raises:
+        CredencialesInvalidasError: si las credenciales no son válidas.
+    """
     user = members_service.get_user_by_email(email, db)
 
     credenciales_ok = (
@@ -61,18 +74,21 @@ def login(email: str, password: str, db: Session) -> tuple[str, RolUsuario, set[
     return token, user.rol, permisos
 
 
-# --- Sesión del Miembro en el portal (011-portal-miembro-autenticacion) ---
+# --- Sesión del Miembro en el portal (RF-02/RF-04) ---
 
 
 def _hash_refresh_token(raw_token: str) -> str:
-    """SHA-256 del token opaco: en DB nunca se guarda el token en claro, así
-    un dump de la tabla no permite fabricar sesiones."""
+    """SHA-256 del token opaco — en DB nunca se guarda en claro."""
     return hashlib.sha256(raw_token.encode()).hexdigest()
 
 
 def _emitir_sesion_miembro(user: User, db: Session) -> tuple[str, str]:
-    """Access token corto (claim `kind=member`, que un JWT de staff no lleva)
-    + refresh token opaco nuevo con la ventana deslizante completa."""
+    """Crea un access token corto (claim ``kind=member``) y un refresh token
+    opaco nuevo con la ventana deslizante completa.
+
+    Returns:
+        Tupla ``(access_token, raw_refresh_token)``.
+    """
     access_token = create_access_token(
         {"sub": str(user.id), "rol": user.rol.value, "kind": "member"},
         expires_minutes=settings.member_access_token_minutes,
@@ -97,8 +113,20 @@ def _es_miembro_activo(user: User | None) -> bool:
 
 
 def login_member(email: str, password: str, db: Session) -> tuple[str, str, User]:
-    """Login del portal: solo rol `miembro` activo con contraseña ya activada.
-    Mismo criterio anti-enumeración que el login de staff."""
+    """Autentica al Miembro en el portal (solo rol ``miembro`` activo con
+    contraseña ya activada). Mismo criterio anti-enumeración que ``login``.
+
+    Args:
+        email: Correo del Miembro.
+        password: Contraseña en texto plano a verificar contra el hash.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        Tupla ``(access_token, raw_refresh_token, user)``.
+
+    Raises:
+        CredencialesInvalidasError: si las credenciales no son válidas.
+    """
     user = members_service.get_user_by_email(email, db)
     credenciales_ok = (
         _es_miembro_activo(user)
@@ -114,10 +142,21 @@ def login_member(email: str, password: str, db: Session) -> tuple[str, str, User
 
 
 def refresh_member_session(raw_token: str, db: Session) -> tuple[str, str, User]:
-    """Rotación (spec 011): el refresh usado se revoca y se emite uno nuevo
-    con la ventana de inactividad renovada — un token robado deja de servir
-    en cuanto se usa el legítimo. Revalida que el usuario siga siendo un
-    Miembro activo (si el staff lo desactivó, la sesión larga muere aquí)."""
+    """Rota la sesión larga del Miembro: revoca el refresh usado y emite uno
+    nuevo con la ventana de inactividad renovada, así un token robado deja de
+    servir en cuanto se usa el legítimo. Revalida que el usuario siga siendo
+    un Miembro activo (si el staff lo desactivó, la sesión muere aquí).
+
+    Args:
+        raw_token: Refresh token opaco recibido del cliente.
+        db: Sesión de base de datos activa.
+
+    Returns:
+        Tupla ``(access_token, raw_refresh_token, user)`` renovada.
+
+    Raises:
+        SesionInvalidaError: si el refresh token no es válido.
+    """
     repo = RefreshTokenRepository(db)
     ahora = now()
     fila = repo.get_vigente_by_hash(_hash_refresh_token(raw_token), ahora)
@@ -140,10 +179,21 @@ def refresh_member_session(raw_token: str, db: Session) -> tuple[str, str, User]
 
 
 def activate_member_account(cedula: str, email: str, password: str, db: Session) -> None:
-    """Activación de cuenta (dudas resueltas en spec 011): la cuenta la creó
-    el staff (004); el Miembro define su contraseña la primera vez si cédula y
-    correo coinciden con un Miembro activo SIN contraseña previa. El hash lo
-    hace members.service (RN-12), dueño de la tabla `usuarios`."""
+    """Activa la cuenta creada por el staff: el Miembro define su contraseña
+    la primera vez si cédula y correo coinciden con un Miembro activo SIN
+    contraseña previa. El hash lo hace ``members.service`` (RN-12), dueño de
+    la tabla ``usuarios``.
+
+    Args:
+        cedula: Cédula del Miembro.
+        email: Correo que debe coincidir con el registrado.
+        password: Contraseña en texto plano a hashear y guardar.
+        db: Sesión de base de datos activa.
+
+    Raises:
+        ActivacionInvalidaError: si cédula/correo no corresponden a un
+            Miembro activo sin contraseña.
+    """
     user = members_service.get_user_by_cedula(cedula, db)
     puede_activar = (
         _es_miembro_activo(user)
@@ -157,8 +207,14 @@ def activate_member_account(cedula: str, email: str, password: str, db: Session)
 
 
 def logout_member(raw_token: str, db: Session) -> None:
-    """Revoca el refresh token si sigue vigente; idempotente (un logout con
-    token ya inválido no es un error)."""
+    """Revoca el refresh token si sigue vigente.
+
+    Idempotente: un logout con un token ya inválido no es un error.
+
+    Args:
+        raw_token: Refresh token opaco a revocar.
+        db: Sesión de base de datos activa.
+    """
     repo = RefreshTokenRepository(db)
     ahora = now()
     fila = repo.get_vigente_by_hash(_hash_refresh_token(raw_token), ahora)
@@ -177,12 +233,17 @@ def list_permissions(usuario_id: int, db: Session) -> list[Permiso]:
 
 
 def list_permissions_catalog(db: Session) -> list[Permiso]:
-    """Todo el catálogo (004): para que un administrador vea qué códigos
+    """Todo el catálogo (HU-07): para que un administrador vea qué códigos
     existen antes de otorgar uno, en vez de escribirlo a ciegas."""
     return AuthRepository(db).list_catalog()
 
 
 def grant_permission(usuario_id: int, codigo: str, db: Session) -> None:
+    """Otorga un permiso individual a un usuario.
+
+    Raises:
+        PermisoInexistenteError: si ``codigo`` no está en el catálogo.
+    """
     members_service.get_user(usuario_id, db)
     permiso = AuthRepository(db).get_permiso_by_codigo(codigo)
     if permiso is None:
@@ -192,6 +253,11 @@ def grant_permission(usuario_id: int, codigo: str, db: Session) -> None:
 
 
 def revoke_permission(usuario_id: int, codigo: str, db: Session) -> None:
+    """Retira un permiso individual antes otorgado a un usuario.
+
+    Raises:
+        PermisoInexistenteError: si ``codigo`` no está en el catálogo.
+    """
     members_service.get_user(usuario_id, db)
     permiso = AuthRepository(db).get_permiso_by_codigo(codigo)
     if permiso is None:

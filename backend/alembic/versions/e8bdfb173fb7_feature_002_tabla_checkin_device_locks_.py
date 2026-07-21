@@ -1,4 +1,4 @@
-"""feature 002: tabla checkin_device_locks y razon_denegacion
+"""HU-02: tabla checkin_device_locks y razon_denegacion
 
 Revision ID: e8bdfb173fb7
 Revises: adc852f8fca8
@@ -29,7 +29,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_checkin_device_locks_device_id'), 'checkin_device_locks', ['device_id'], unique=True)
     op.create_index(op.f('ix_checkin_device_locks_id'), 'checkin_device_locks', ['id'], unique=False)
     # NOTA: autogenerate detectó como "removido" el índice único parcial
-    # ix_checkins_usuario_dia_activo de 001 (creado con SQL crudo, Alembic no
+    # ix_checkins_usuario_dia_activo de HU-01 (creado con SQL crudo, Alembic no
     # lo reconoce como metadata ORM) y proponía un DROP INDEX — se quita a
     # mano, ese índice sigue vigente y no lo toca esta migración.
     # ### end Alembic commands ###
